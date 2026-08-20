@@ -102,3 +102,27 @@ export interface CalendarSlot {
   notes: string | null;
   createdAt: string | null;
 }
+
+export interface PrintProduct {
+  id: number;
+  vendorId: number;
+  name: string;
+  description: string | null;
+  category: string;
+  priceCents: number;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface PrintOrder {
+  id: number;
+  vendorId: number;
+  clientId: number;
+  galleryId: number | null;
+  status: string;
+  totalCents: number;
+  shippingCents: number;
+  stripePaymentIntentId: string | null;
+  shippingAddress: Record<string, unknown> | null;
+  notes: string | null;
+}

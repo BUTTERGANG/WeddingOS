@@ -280,8 +280,88 @@ export const calendarSlots = pgTable(
   }),
 );
 
-// ── Sessions ─────────────────────────────────────────────────────────────────
-// Vendor authentication sessions.
+// ── Print Products ────────────────────────────────────────────────────────────
+// Products available for print ordering from a vendor's gallery.
+//
+export const printProducts = pgTable(
+  "print_products",
+  {
+    id: serial("id").primaryKey(),
+    vendorId: integer("vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    category: text("category").default("print"),
+    priceCents: integer("price_cents").notNull(),
+    isActive: boolean("is_active").default(true),
+    sortOrder: integer("sort_order").default(0),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    vendorIdIdx: index("print_products_vendor_id_idx").on(table.vendorId),
+  }),
+);
+
+// ── Print Orders ──────────────────────────────────────────────────────────────
+// Orders placed by a client for prints from a gallery.
+//
+export const printOrders = pgTable(
+  "print_orders",
+  {
+    id: serial("id").primaryKey(),
+    vendorId: integer("vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    clientId: integer("client_id")
+      .references(() => clients.id, { onDelete: "cascade" })
+      .notNull(),
+    galleryId: integer("gallery_id")
+      .references(() => galleries.id, { onDelete: "set null" }),
+    status: text("status").default("pending"),
+    totalCents: integer("total_cents").notNull(),
+    shippingCents: integer("shipping_cents").default(0),
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
+    shippingAddress: jsonb("shipping_address"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    vendorIdIdx: index("print_orders_vendor_id_idx").on(table.vendorId),
+    clientIdIdx: index("print_orders_client_id_idx").on(table.clientId),
+    statusCheck: check(
+      "print_orders_status_check",
+      sql`${table.status} IN ('pending', 'paid', 'fulfilled', 'cancelled')`,
+    ),
+  }),
+);
+
+// ── Print Order Items ─────────────────────────────────────────────────────────
+// Individual items within a print order.
+//
+export const printOrderItems = pgTable(
+  "print_order_items",
+  {
+    id: serial("id").primaryKey(),
+    orderId: integer("order_id")
+      .references(() => printOrders.id, { onDelete: "cascade" })
+      .notNull(),
+    productId: integer("product_id")
+      .references(() => printProducts.id, { onDelete: "set null" }),
+    imageId: integer("image_id")
+      .references(() => galleryImages.id, { onDelete: "set null" }),
+    productName: text("product_name").notNull(),
+    quantity: integer("quantity").default(1),
+    unitPriceCents: integer("unit_price_cents").notNull(),
+    totalCents: integer("total_cents").notNull(),
+    imageFilename: text("image_filename"),
+  },
+  (table) => ({
+    orderIdIdx: index("print_order_items_order_id_idx").on(table.orderId),
+  }),
+);
 
 export const sessions = pgTable(
   "sessions",

@@ -52,7 +52,7 @@ Single-tenant, single vendor manages their studio through WeddingOS.
 ### Phase 2 — Revenue Features (Weeks 9-12)
 - [x] Contract builder + e-signature
 - [x] Calendar booking (public embed for clients)
-- [ ] Print store (photo lab API — Mpix/WHCC)
+- [x] Print store (photo lab API — Mpix/WHCC)
 - [ ] Blog/SEO website pages
 
 ### Phase 3 — Moats (Weeks 13-16)

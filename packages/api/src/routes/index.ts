@@ -9,6 +9,8 @@ import { contractsRouter } from "./contracts.routes.js";
 import { calendarRouter } from "./calendar.routes.js";
 import { publicGalleryRouter } from "./gallery-public.routes.js";
 import { publicCalendarRouter } from "./calendar-public.routes.js";
+import { printProductsRouter } from "./print-products.routes.js";
+import { printStoreRouter } from "./print-store.routes.js";
 
 export const routes = Router();
 
@@ -24,3 +26,6 @@ routes.use("/api/calendar", calendarRouter);
 routes.use("/api/g/public", publicGalleryRouter);
 
 routes.use("/api/calendar/public", publicCalendarRouter);
+
+routes.use("/api/print-products", printProductsRouter);
+routes.use("/api/print-store", printStoreRouter);

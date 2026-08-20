@@ -30,7 +30,7 @@
 
 | Task File | Priority | Estimate | Status |
 |-----------|----------|----------|--------|
-| phase_2_print_store.md | P2 | 2 weeks | backlog |
+| phase_2_print_store.md | P2 | 2 weeks | ✅ DONE |
 | phase_2_contract_builder.md | P2 | 2 weeks | ✅ DONE |
 | phase_2_calendar_booking.md | P2 | 2 weeks | ✅ DONE |
 

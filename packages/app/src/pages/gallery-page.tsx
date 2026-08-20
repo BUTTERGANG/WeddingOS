@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
 import { api, apiUpload } from "@/lib/api";
-import type { Gallery, GalleryImage } from "@/lib/types";
+import type { Gallery, GalleryImage, PrintProduct, PrintOrder } from "@/lib/types";
 
 interface GalleryPageProps {
   clientId: string;
@@ -20,6 +20,14 @@ function GalleryDetail({
   const [loading, setLoading] = useState(true);
   const [lightboxImage, setLightboxImage] = useState<GalleryImage | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Print storefront state
+  const [showPrintStore, setShowPrintStore] = useState(false);
+  const [products, setProducts] = useState<PrintProduct[]>([]);
+  const [printImageId, setPrintImageId] = useState<number | null>(null);
+  const [cartQuantities, setCartQuantities] = useState<Record<number, number>>({});
+  const [orderResult, setOrderResult] = useState<{ message: string; checkoutUrl?: string } | null>(null);
+  const [placingOrder, setPlacingOrder] = useState(false);
 
   useEffect(() => {
     api<GalleryImage[]>(`/galleries/${gallery.id}/images`)
@@ -148,6 +156,297 @@ function GalleryDetail({
               )}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Order Prints button — visible when published and images exist */}
+      {gallery.isPublished && images.length > 0 && (
+        <div className="flex justify-center">
+          <button
+            onClick={() => {
+              setShowPrintStore(true);
+              setOrderResult(null);
+              setCartQuantities({});
+              setPrintImageId(images[0]?.id ?? null);
+              api<PrintProduct[]>("/print-store/products")
+                .then((data) => setProducts(data.filter((p) => p.isActive)))
+                .catch(() => toast.error("Failed to load print products"));
+            }}
+            className="px-5 py-2.5 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition-colors shadow-sm"
+          >
+            Order Prints
+          </button>
+        </div>
+      )}
+
+      {/* Print store modal */}
+      {showPrintStore && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+          onClick={() => {
+            if (!placingOrder) setShowPrintStore(false);
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-gray-200 shrink-0">
+              <h2 className="text-lg font-semibold text-gray-900">Print Store</h2>
+              <button
+                onClick={() => setShowPrintStore(false)}
+                className="text-gray-400 hover:text-gray-600 disabled:opacity-40"
+                disabled={placingOrder}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Body — scrollable */}
+            <div className="p-5 space-y-5 overflow-y-auto grow">
+              {/* Order result banner */}
+              {orderResult && (
+                <div className={`rounded-xl p-4 text-sm ${orderResult.checkoutUrl ? "bg-green-50 text-green-800 border border-green-200" : "bg-blue-50 text-blue-800 border border-blue-200"}`}>
+                  <p className="font-medium mb-1">{orderResult.checkoutUrl ? "Order placed!" : orderResult.message}</p>
+                  {orderResult.checkoutUrl ? (
+                    <>
+                      <p className="mb-2">{orderResult.message}</p>
+                      <a
+                        href={orderResult.checkoutUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        Proceed to Checkout →
+                      </a>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setShowPrintStore(false)}
+                      className="mt-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Close
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Image selector */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Select image to print
+                </label>
+                <select
+                  value={printImageId ?? ""}
+                  onChange={(e) => setPrintImageId(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white"
+                  disabled={placingOrder || !!orderResult}
+                >
+                  {images.map((img) => (
+                    <option key={img.id} value={img.id}>
+                      {img.originalName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Products grouped by category */}
+              {(["prints", "canvas", "metal", "book"] as const).map((category) => {
+                const catProducts = products.filter(
+                  (p) => p.category.toLowerCase() === category
+                );
+                if (catProducts.length === 0) return null;
+                return (
+                  <div key={category}>
+                    <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-2 capitalize">
+                      {category}
+                    </h3>
+                    <div className="space-y-2">
+                      {catProducts
+                        .sort((a, b) => a.sortOrder - b.sortOrder)
+                        .map((product) => {
+                          const qty = cartQuantities[product.id] ?? 0;
+                          return (
+                            <div
+                              key={product.id}
+                              className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50"
+                            >
+                              <div className="flex-1 min-w-0 mr-4">
+                                <p className="text-sm font-medium text-gray-900">
+                                  {product.name}
+                                </p>
+                                {product.description && (
+                                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                                    {product.description}
+                                  </p>
+                                )}
+                                <p className="text-sm font-semibold text-brand-600 mt-1">
+                                  ${(product.priceCents / 100).toFixed(2)}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                  onClick={() =>
+                                    setCartQuantities((prev) => ({
+                                      ...prev,
+                                      [product.id]: Math.max(0, (prev[product.id] ?? 0) - 1),
+                                    }))
+                                  }
+                                  className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-30"
+                                  disabled={qty === 0 || !!orderResult}
+                                >
+                                  –
+                                </button>
+                                <span className="w-8 text-center text-sm font-medium text-gray-900 tabular-nums">
+                                  {qty}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    setCartQuantities((prev) => ({
+                                      ...prev,
+                                      [product.id]: (prev[product.id] ?? 0) + 1,
+                                    }))
+                                  }
+                                  className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-30"
+                                  disabled={!!orderResult}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {products.length === 0 && (
+                <div className="text-center py-8 text-gray-400 text-sm">
+                  No print products available
+                </div>
+              )}
+            </div>
+
+            {/* Footer — cart summary + place order */}
+            <div className="border-t border-gray-200 p-5 shrink-0">
+              {(() => {
+                const subtotalCents = Object.entries(cartQuantities).reduce(
+                  (sum, [productId, qty]) => {
+                    const product = products.find(
+                      (p) => p.id === Number(productId)
+                    );
+                    return sum + (product ? product.priceCents * qty : 0);
+                  },
+                  0
+                );
+                const subtotal = subtotalCents / 100;
+                const shipping = subtotal >= 50 ? 0 : 5.99;
+                const total = subtotal + shipping;
+                const itemCount = Object.values(cartQuantities).reduce(
+                  (sum, qty) => sum + qty,
+                  0
+                );
+
+                return (
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Subtotal</span>
+                      <span className="text-gray-900 font-medium">
+                        ${subtotal.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">
+                        Shipping{subtotal >= 50 && subtotal > 0 ? " (free)" : ""}
+                      </span>
+                      <span
+                        className={`font-medium ${
+                          shipping === 0
+                            ? "text-green-600"
+                            : "text-gray-900"
+                        }`}
+                      >
+                        {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                      </span>
+                    </div>
+                    {subtotal > 0 && subtotal < 50 && (
+                      <p className="text-xs text-gray-400">
+                        Add ${(50 - subtotal).toFixed(2)} more for free shipping
+                      </p>
+                    )}
+                    <div className="flex justify-between text-base font-semibold text-gray-900 pt-2 border-t border-gray-200">
+                      <span>Total</span>
+                      <span>${total.toFixed(2)}</span>
+                    </div>
+
+                    <button
+                      onClick={async () => {
+                        if (!printImageId) {
+                          toast.error("Please select an image");
+                          return;
+                        }
+                        const items = Object.entries(cartQuantities)
+                          .filter(([, qty]) => qty > 0)
+                          .map(([productId, quantity]) => ({
+                            productId: Number(productId),
+                            quantity,
+                          }));
+                        if (items.length === 0) {
+                          toast.error("Please add items to your cart");
+                          return;
+                        }
+                        setPlacingOrder(true);
+                        try {
+                          const order = await api<PrintOrder & { checkoutUrl?: string }>(
+                            "/print-store/orders",
+                            {
+                              method: "POST",
+                              body: {
+                                galleryId: gallery.id,
+                                imageId: printImageId,
+                                items,
+                              },
+                            }
+                          );
+                          if (order.checkoutUrl) {
+                            setOrderResult({
+                              message: "Your order has been placed! Click below to complete payment.",
+                              checkoutUrl: order.checkoutUrl,
+                            });
+                          } else {
+                            setOrderResult({
+                              message: "Your order has been placed successfully!",
+                            });
+                          }
+                          toast.success("Order placed!");
+                        } catch (err: unknown) {
+                          toast.error(
+                            err instanceof Error ? err.message : "Failed to place order"
+                          );
+                        } finally {
+                          setPlacingOrder(false);
+                        }
+                      }}
+                      disabled={
+                        itemCount === 0 || !printImageId || placingOrder || !!orderResult
+                      }
+                      className="w-full py-2.5 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {placingOrder
+                        ? "Placing order..."
+                        : orderResult
+                          ? "Order Placed"
+                          : `Place Order (${itemCount} item${itemCount === 1 ? "" : "s"})`}
+                    </button>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
         </div>
       )}
 

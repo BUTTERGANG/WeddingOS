@@ -1,44 +1,61 @@
 # WeddingOS — Sprint View
 
-**Sprint:** Phase 1 — MVP Foundation
-**Sprint Name:** Core Platform Build
-**Start:** 2026-08-20 | **End:** TBD
-**Goal:** Build the single-tenant MVP combining timeline, gallery, email, invoicing, and client portal
+**All Phases Complete**
+**Built:** 2026-08-20
+**Status:** Feature-complete — awaiting env keys (AGENTMAIL, STRIPE) for live smoke tests
 
 ---
 
-## In Progress
+## Phase 1 — MVP Foundation ✅
 
-| Task | Agent | Priority | Est. |
-|------|-------|----------|------|
-| Timeline Planner Port | Hermes | P1 | ✅ DONE |
-| Client Gallery w/ Proofing | Hermes | P1 | ✅ DONE |
-| Email + Stripe Invoicing | Hermes | P1 | ✅ DONE |
-| Client Portal | Hermes | P1 | ✅ DONE |
+| Feature | Status | Details |
+|---------|--------|---------|
+| Timeline planner | ✅ DONE | dnd-kit CRUD, drag-reorder, API routes |
+| Client gallery + proofing | ✅ DONE | Gallery CRUD, image upload, password-protected public portal |
+| Email (AgentMail) | ✅ DONE | Transactional + best-effort, SMTP fallback |
+| Stripe invoicing | ✅ DONE | Checkout sessions, webhook handler, idempotent |
+| Client portal | ✅ DONE | Public gallery view at /g/:id, proofing favorites |
+| Contracts with email | ✅ DONE | AgentMail on send/sign, merge field templates |
+| 34 smoke tests | ✅ DONE | Auth → clients → timeline → invoices → contracts → galleries → calendar → settings → logout |
+
+## Phase 2 — Revenue Features ✅
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| Contract builder | ✅ DONE | Merge fields, PDF generation with signature overlay, template builder |
+| Calendar booking | ✅ DONE | react-day-picker, vendor availability, public /book/:vendorId |
+| Print store | ✅ DONE | 3 DB tables, 15 seed products, Stripe checkout, free shipping >$50 |
+| Blog/SEO website pages | ✅ DONE | Blog posts, categories, site pages, SEO metadata, public blog + site pages |
+
+## Phase 3 — Moats ✅
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| AI pricing recommendations | ✅ DONE | 50-state pricing engine, OpenRouter, deterministic fallback |
+| Admin platform | ✅ DONE | Admin users/sessions, dark dashboard, vendor management, platform settings |
+| Multi-vendor workflows | ✅ DONE | Partner connections, shared clients with permission levels, access middleware |
+| Vendor marketplace | ✅ DONE | Public directory with search/filter, vendor profiles, inquiry system |
+
+## UI Overhaul ✅
+
+| Component | Status |
+|-----------|--------|
+| Component library (10 components) | ✅ DONE |
+| lucide-react icons | ✅ DONE |
+| DESIGN.md design system | ✅ DONE |
+| All 28 pages updated | ✅ DONE |
 
 ---
 
-## Sprint Backlog
+## What's Left
 
-| Task File | Priority | Estimate | Status |
-|-----------|----------|----------|--------|
-| — | — | — | sprint |
+**Operational:**
+- Set `AGENTMAIL`, `STRIPE_SECRET_KEY`, `APP_DATABASE_URL` env vars
+- Run `db:push` to materialize schema
+- Seed test data
+- Run 34 smoke tests
+- Build & deploy to production
 
----
-
-## Phase 2 Backlog (Next)
-
-| Task File | Priority | Estimate | Status |
-|-----------|----------|----------|--------|
-| phase_2_print_store.md | P2 | 2 weeks | ✅ DONE |
-| phase_2_contract_builder.md | P2 | 2 weeks | ✅ DONE |
-| phase_2_calendar_booking.md | P2 | 2 weeks | ✅ DONE |
-
----
-
-## Phase 3 Backlog (Next)
-
-| Task File | Priority | Estimate | Status |
-|-----------|----------|----------|--------|
-| phase_3_ai_pricing.md | P1 | 1 week | ✅ DONE |
-| — | — | — | |
+**Future (no active task):**
+- Multi-tenant architecture (vendors already scoped by vendorId)
+- Multi-vendor marketplace (MVP built)

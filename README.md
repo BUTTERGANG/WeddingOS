@@ -68,10 +68,29 @@ Multi-vendor collaboration with shared client records, partner connections, and 
 ### ✅ Print Store
 Photo print ordering via integrated print store with product categories (prints, canvas, metal, books), cart management, and checkout.
 
-### ✅ UI Component Library
+## UI Component Library
 Consistent design system with reusable components built on Tailwind CSS and lucide-react icons. See `DESIGN.md` for full reference.
 
 ---
+
+## Getting Started
+
+```bash
+# Install dependencies
+pnpm install
+
+# Push DB schema (needs APP_DATABASE_URL or APP_DATABASE_DEVELOPMENT)
+pnpm db:push
+
+# Start API server (needs AGENTMAIL + STRIPE_SECRET_KEY)
+pnpm dev
+
+# Start frontend dev server (Vite, proxies /api to :5000)
+cd packages/app && pnpm dev
+
+# Run smoke tests (needs API running)
+SMOKE_API=http://localhost:5000 npx tsx packages/api/scripts/smoke.ts
+```
 
 ## Reference
 

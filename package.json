@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter @weddingos/api run dev\" \"pnpm --filter @weddingos/app run dev\"",
+    "dev": "concurrently \"PORT=5001 pnpm --filter @weddingos/api run dev\" \"pnpm --filter @weddingos/app run dev\"",
     "build": "pnpm -r build",
     "start": "pnpm --filter @weddingos/api run start",
     "check": "pnpm -r check",

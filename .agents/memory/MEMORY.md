@@ -1,0 +1,1 @@
+- [Existing database schema sync](existing-database-schema-sync.md) — Do not run the current Drizzle push against databases with named NOT NULL constraints.

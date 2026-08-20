@@ -15,7 +15,10 @@ Add one of these secrets before using API features that read or write data:
 - `APP_DATABASE_URL` — preferred PostgreSQL connection string
 - `APP_DATABASE_DEVELOPMENT` — development-only PostgreSQL connection string
 
-After adding a database URL, run `pnpm db:push` once to apply the Drizzle schema.
+For a brand-new empty database, run `pnpm db:push` once to apply the Drizzle
+schema. The configured database already contains all WeddingOS tables, so do not
+run that command against it: its named `NOT NULL` constraints are incompatible
+with this version of Drizzle Kit's schema diffing.
 
 ## Optional integrations
 

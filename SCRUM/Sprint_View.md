@@ -11,7 +11,10 @@
 
 | Task | Agent | Priority | Est. |
 |------|-------|----------|------|
-| —    | —     | —        | —    |
+| Timeline Planner Port | Hermes | P1 | 2 weeks |
+| Client Gallery w/ Proofing | Hermes | P1 | 2 weeks |
+| Email + Invoicing | Hermes | P1 | 1 week |
+| Client Portal | Hermes | P1 | 2 weeks |
 
 ---
 
@@ -19,10 +22,7 @@
 
 | Task File | Priority | Estimate | Status |
 |-----------|----------|----------|--------|
-| phase_1_timeline_planner_port.md | P1 | 2 weeks | sprint |
-| phase_1_client_gallery_with_proofing.md | P1 | 2 weeks | sprint |
-| phase_1_email_and_invoicing.md | P1 | 1 week | sprint |
-| phase_1_client_portal.md | P1 | 2 weeks | sprint |
+| — | — | — | sprint |
 
 ---
 

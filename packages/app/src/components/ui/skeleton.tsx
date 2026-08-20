@@ -15,7 +15,7 @@ export default function Skeleton({
 }: SkeletonProps) {
   return (
     <div
-      className={`animate-pulse bg-gray-200 ${variantStyles[variant]} ${className}`}
+      className={`animate-pulse bg-gray-200 dark:bg-gray-700 ${variantStyles[variant]} ${className}`}
     />
   );
 }

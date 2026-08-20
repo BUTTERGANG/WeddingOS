@@ -3,9 +3,12 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { Card, Button, Input, PageHeader } from "@/components/ui";
+import { useTheme } from "@/lib/theme";
+import { Sun, Moon } from "lucide-react";
 
 export default function SettingsPage() {
   const { vendor } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   // Business info
   const [businessName, setBusinessName] = useState(vendor?.businessName || "");
@@ -154,17 +157,46 @@ export default function SettingsPage() {
 
       {/* Account info */}
       <Card className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Account</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Account</h2>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-500">Email</span>
-            <span className="text-gray-900">{vendor?.email}</span>
+            <span className="text-gray-500 dark:text-gray-400">Email</span>
+            <span className="text-gray-900 dark:text-gray-100">{vendor?.email}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Name</span>
-            <span className="text-gray-900">{vendor?.name}</span>
+            <span className="text-gray-500 dark:text-gray-400">Name</span>
+            <span className="text-gray-900 dark:text-gray-100">{vendor?.name}</span>
           </div>
         </div>
+      </Card>
+
+      {/* Appearance */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Appearance</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Choose your preferred theme. This setting is saved to your browser.
+        </p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant={theme === "dark" ? "primary" : "secondary"}
+            onClick={() => setTheme("dark")}
+            className="flex items-center gap-2"
+          >
+            <Moon className="w-4 h-4" />
+            Dark
+          </Button>
+          <Button
+            variant={theme === "light" ? "primary" : "secondary"}
+            onClick={() => setTheme("light")}
+            className="flex items-center gap-2"
+          >
+            <Sun className="w-4 h-4" />
+            Light
+          </Button>
+        </div>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+          Currently: <span className="font-medium capitalize">{theme}</span> mode
+        </p>
       </Card>
     </div>
   );

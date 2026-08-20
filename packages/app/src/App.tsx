@@ -32,13 +32,15 @@ import MarketplaceVendorProfile from "@/pages/marketplace-vendor-profile";
 import MarketplaceSettings from "@/pages/marketplace-settings";
 import MarketplaceInbox from "@/pages/marketplace-inbox";
 import { AdminLayout } from "@/components/admin-layout";
+import { ThemeProvider } from "@/lib/theme";
+import WelcomePage from "@/pages/welcome-page";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { vendor, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto"></div>
           <p className="mt-4 text-gray-500">Loading...</p>
@@ -48,7 +50,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!vendor) {
-    return <Redirect to="/login" />;
+    return <Redirect to="/" />;
   }
 
   return <Layout>{children}</Layout>;
@@ -59,7 +61,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto"></div>
           <p className="mt-4 text-gray-500">Loading...</p>
@@ -80,7 +82,7 @@ function RootRedirect() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mx-auto"></div>
           <p className="mt-4 text-gray-500">Loading...</p>
@@ -89,7 +91,11 @@ function RootRedirect() {
     );
   }
 
-  return <Redirect to={vendor ? "/dashboard" : "/login"} />;
+  if (vendor) {
+    return <Redirect to="/dashboard" />;
+  }
+
+  return <WelcomePage />;
 }
 
 function AppRoutes() {
@@ -274,9 +280,9 @@ function AppRoutes() {
       </Route>
 
       <Route>
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-800">404</h1>
+            <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-200">404</h1>
             <p className="mt-2 text-gray-500">Page not found</p>
           </div>
         </div>
@@ -287,12 +293,14 @@ function AppRoutes() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <Toaster position="top-right" />
-        <AppRoutes />
-      </AuthProvider>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <AuthProvider>
+          <Toaster position="top-right" />
+          <AppRoutes />
+        </AuthProvider>
+      </Router>
+    </ThemeProvider>
   );
 }
 

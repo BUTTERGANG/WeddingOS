@@ -91,3 +91,33 @@ All components live at `@/components/ui/` and are exported from `@/components/ui
 ## Icons
 
 Uses **lucide-react** for all icons. No inline SVGs.
+
+## Dark Mode
+
+Dark mode is the **default**. Users can switch to light mode via:
+
+1. **Sidebar** — "Light Mode" / "Dark Mode" toggle button in the footer area
+2. **Mobile header** — Sun/Moon icon button
+3. **Settings page** — Appearance section with Dark/Light radio buttons
+
+The preference is persisted in `localStorage` under key `weddingos-theme`.
+
+### Implementation
+
+- `darkMode: "class"` in `tailwind.config.js`
+- `ThemeProvider` context at `@/lib/theme` wraps the app in `App.tsx`
+- All UI components use `dark:` variants for backgrounds, text, borders, and hover states
+- The `<html>` element gets `class="dark"` applied/removed by the ThemeProvider
+
+### Component Dark Variants
+
+| Component | Light | Dark |
+|-----------|-------|------|
+| Page background | `bg-gray-50` | `bg-gray-950` |
+| Card | `bg-white border-gray-200` | `bg-gray-800 border-gray-700` |
+| Input / Select | `bg-white border-gray-300` | `bg-gray-700 border-gray-600` |
+| Button (secondary) | `bg-white border-gray-300` | `bg-gray-700 border-gray-600` |
+| Sidebar | `bg-white border-gray-200` | `bg-gray-900 border-gray-800` |
+| Skeleton | `bg-gray-200` | `bg-gray-700` |
+| Text (primary) | `text-gray-900` | `text-gray-100` |
+| Text (secondary) | `text-gray-500` | `text-gray-400` |

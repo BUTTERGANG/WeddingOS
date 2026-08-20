@@ -6,6 +6,8 @@ import {
   requireAuth,
   type AuthenticatedRequest,
 } from "../middleware/auth.js";
+import { sendTransactional } from "../lib/mail.js";
+import { absUrl } from "../lib/site-url.js";
 
 export const contractsRouter = Router();
 
@@ -22,6 +24,27 @@ async function verifyClientOwnership(
     .where(and(eq(clients.id, clientId), eq(clients.vendorId, vendorId)))
     .limit(1);
   return !!client;
+}
+
+// Helper: get client for a contract
+async function getClientForContract(
+  contractId: number,
+  vendorId: number,
+) {
+  const [contract] = await db
+    .select()
+    .from(contracts)
+    .where(
+      and(eq(contracts.id, contractId), eq(contracts.vendorId, vendorId)),
+    )
+    .limit(1);
+  if (!contract) return null;
+  const [client] = await db
+    .select()
+    .from(clients)
+    .where(eq(clients.id, contract.clientId))
+    .limit(1);
+  return client || null;
 }
 
 // Helper: verify contract ownership
@@ -181,6 +204,20 @@ contractsRouter.post("/:id/send", async (req: AuthenticatedRequest, res, next) =
       .where(eq(contracts.id, contractId))
       .returning();
 
+    // Send email notification to client
+    try {
+      const client = await getClientForContract(contractId, vendorId);
+      if (client) {
+        await sendTransactional({
+          to: client.email,
+          subject: `Contract: ${contract.title} from WeddingOS`,
+          text: `Hello ${client.name},\n\nA contract is ready for your review.\n\nContract: ${contract.title}\n\nPlease review and sign at: ${absUrl(`/api/contracts/${contractId}/sign`)}\n\nThank you!`,
+        });
+      }
+    } catch {
+      // Email send failed — contract is still marked as sent
+    }
+
     res.json({ contract: updated, message: "Contract marked as sent" });
   } catch (error) {
     next(error);
@@ -226,6 +263,20 @@ contractsRouter.post("/:id/sign", async (req: AuthenticatedRequest, res, next) =
       })
       .where(eq(contracts.id, contractId))
       .returning();
+
+    // Notify vendor that contract was signed
+    try {
+      const client = await getClientForContract(contractId, vendorId);
+      if (client) {
+        await sendTransactional({
+          to: req.vendor!.email,
+          subject: `Contract signed: ${contract.title}`,
+          text: `Great news! ${client.name} has signed the contract "${contract.title}".\n\nView details in your WeddingOS dashboard.`,
+        });
+      }
+    } catch {
+      // Email send failed — contract is still signed
+    }
 
     res.json({ contract: updated, message: "Contract signed" });
   } catch (error) {

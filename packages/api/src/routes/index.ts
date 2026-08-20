@@ -7,6 +7,7 @@ import { galleriesRouter } from "./galleries.routes.js";
 import { invoicesRouter } from "./invoices.routes.js";
 import { contractsRouter } from "./contracts.routes.js";
 import { calendarRouter } from "./calendar.routes.js";
+import { publicGalleryRouter } from "./gallery-public.routes.js";
 
 export const routes = Router();
 
@@ -18,3 +19,5 @@ routes.use("/api/galleries", galleriesRouter);
 routes.use("/api/invoices", invoicesRouter);
 routes.use("/api/contracts", contractsRouter);
 routes.use("/api/calendar", calendarRouter);
+
+routes.use("/api/g/public", publicGalleryRouter);

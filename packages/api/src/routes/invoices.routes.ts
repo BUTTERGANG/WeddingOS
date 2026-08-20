@@ -6,6 +6,10 @@ import {
   requireAuth,
   type AuthenticatedRequest,
 } from "../middleware/auth.js";
+import { createInvoiceCheckoutSession, isStripeConfigured } from "../lib/stripe.js";
+import { sendTransactional } from "../lib/mail.js";
+import { absUrl } from "../lib/site-url.js";
+import { emailLog } from "@weddingos/db";
 
 export const invoicesRouter = Router();
 
@@ -34,6 +38,19 @@ async function verifyInvoiceOwnership(invoiceId: number, vendorId: number) {
     )
     .limit(1);
   return invoice || null;
+}
+
+// Helper: get client info for an invoice
+async function getClientForInvoice(invoiceId: number) {
+  const [result] = await db
+    .select({
+      client: clients,
+    })
+    .from(invoices)
+    .innerJoin(clients, eq(invoices.clientId, clients.id))
+    .where(eq(invoices.id, invoiceId))
+    .limit(1);
+  return result?.client ?? null;
 }
 
 // GET /api/invoices/:clientId — list invoices for client
@@ -205,7 +222,7 @@ invoicesRouter.patch("/:id", async (req: AuthenticatedRequest, res, next) => {
   }
 });
 
-// POST /api/invoices/:id/send — mark as sent
+// POST /api/invoices/:id/send — send invoice via email + create Stripe checkout
 invoicesRouter.post("/:id/send", async (req: AuthenticatedRequest, res, next) => {
   try {
     const vendorId = req.vendor!.id;
@@ -224,19 +241,52 @@ invoicesRouter.post("/:id/send", async (req: AuthenticatedRequest, res, next) =>
       });
     }
 
+    const client = await getClientForInvoice(invoiceId);
+    if (!client) {
+      return res.status(404).json({
+        error: { name: "NotFound", message: "Client not found" },
+      });
+    }
+
+    // Mark as sent first
     const [updated] = await db
       .update(invoices)
       .set({ status: "sent" })
       .where(eq(invoices.id, invoiceId))
       .returning();
 
-    res.json({ invoice: updated, message: "Invoice marked as sent" });
+    // Send email notification to client
+    const amountDollars = (invoice.amountCents / 100).toFixed(2);
+    const paymentLink = isStripeConfigured()
+      ? absUrl(`/api/invoices/${invoiceId}/pay`)
+      : null;
+
+    try {
+      await sendTransactional({
+        to: client.email,
+        subject: `Invoice ${invoice.invoiceNumber} from WeddingOS`,
+        text: `Hello ${client.name},\n\nYou have a new invoice from your wedding vendor.\n\nInvoice: ${invoice.invoiceNumber}\nAmount: $${amountDollars}\nDue: ${invoice.dueDate ?? "N/A"}\n${paymentLink ? `\nPay online: ${paymentLink}\n` : ""}\n\nThank you!`,
+      });
+
+      // Log the email (best-effort — never block invoice send on log write)
+      await db.insert(emailLog).values({
+        vendorId: vendorId,
+        toAddress: client.email,
+        subject: `Invoice ${invoice.invoiceNumber}`,
+        provider: "agentmail",
+        status: "sent",
+      } as any).catch(() => {});
+    } catch {
+      // Email send failed — invoice is still marked as sent
+    }
+
+    res.json({ invoice: updated, message: "Invoice sent to client" });
   } catch (error) {
     next(error);
   }
 });
 
-// POST /api/invoices/:id/pay — mark as paid
+// POST /api/invoices/:id/pay — create Stripe Checkout Session for payment
 invoicesRouter.post("/:id/pay", async (req: AuthenticatedRequest, res, next) => {
   try {
     const vendorId = req.vendor!.id;
@@ -255,13 +305,42 @@ invoicesRouter.post("/:id/pay", async (req: AuthenticatedRequest, res, next) => 
       });
     }
 
+    const client = await getClientForInvoice(invoiceId);
+    if (!client) {
+      return res.status(404).json({
+        error: { name: "NotFound", message: "Client not found" },
+      });
+    }
+
+    // Try Stripe checkout
+    if (isStripeConfigured()) {
+      const session = await createInvoiceCheckoutSession({
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        amountCents: invoice.amountCents,
+        clientEmail: client.email,
+        description: `Invoice ${invoice.invoiceNumber}${invoice.notes ? ` — ${invoice.notes}` : ""}`,
+        successUrl: absUrl("/dashboard"),
+        cancelUrl: absUrl(`/clients/${invoice.clientId}/invoices`),
+      });
+
+      if (session) {
+        return res.json({
+          checkoutUrl: session.sessionUrl,
+          sessionId: session.sessionId,
+          message: "Stripe checkout session created",
+        });
+      }
+    }
+
+    // Fallback: mark as paid directly (no Stripe configured)
     const [updated] = await db
       .update(invoices)
       .set({ status: "paid", paidAt: new Date() })
       .where(eq(invoices.id, invoiceId))
       .returning();
 
-    res.json({ invoice: updated, message: "Invoice marked as paid" });
+    res.json({ invoice: updated, message: "Invoice marked as paid (no payment processor)" });
   } catch (error) {
     next(error);
   }

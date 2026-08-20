@@ -10,6 +10,8 @@ import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { sendTransactional } from "../lib/mail.js";
+import { absUrl } from "../lib/site-url.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.resolve(__dirname, "..", "..", "uploads");
@@ -42,6 +44,27 @@ async function verifyGalleryOwnership(
     .where(and(eq(galleries.id, galleryId), eq(galleries.vendorId, vendorId)))
     .limit(1);
   return gallery || null;
+}
+
+// Helper: get client for a gallery
+async function getClientForGallery(
+  galleryId: number,
+  vendorId: number,
+) {
+  const [gallery] = await db
+    .select()
+    .from(galleries)
+    .where(
+      and(eq(galleries.id, galleryId), eq(galleries.vendorId, vendorId)),
+    )
+    .limit(1);
+  if (!gallery) return null;
+  const [client] = await db
+    .select()
+    .from(clients)
+    .where(eq(clients.id, gallery.clientId))
+    .limit(1);
+  return client || null;
 }
 
 // GET /api/galleries/:clientId — list galleries for a client
@@ -155,6 +178,22 @@ galleriesRouter.patch("/:id", async (req: AuthenticatedRequest, res, next) => {
       .set(updateData)
       .where(eq(galleries.id, galleryId))
       .returning();
+
+    // If gallery was just published, notify the client
+    if (req.body.isPublished === true && !gallery.isPublished) {
+      try {
+        const client = await getClientForGallery(galleryId, vendorId);
+        if (client) {
+          await sendTransactional({
+            to: client.email,
+            subject: `Your gallery is ready: ${gallery.title}`,
+            text: `Hello ${client.name},\n\nYour photo gallery "${gallery.title}" is ready to view!\n\nView your gallery: ${absUrl(`/api/g/public/${gallery.id}`)}\n\nThank you!`,
+          });
+        }
+      } catch {
+        // Email send failed — gallery is still published
+      }
+    }
 
     res.json({ gallery: updated });
   } catch (error) {

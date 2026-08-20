@@ -6,6 +6,7 @@ import pinoHttp from "pino-http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { routes } from "./routes/index.js";
+import { stripeWebhookRouter } from "./routes/stripe-webhook.routes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,6 +22,12 @@ export const app = express();
 
 // Trust proxy for correct IP behind reverse proxy
 app.set("trust proxy", 1);
+
+// Stripe webhook needs raw body before JSON parsing
+app.use("/stripe/webhook", express.raw({ type: "application/json" }), (req: any, _res: any, next: any) => {
+  req.rawBody = req.body;
+  next();
+}, stripeWebhookRouter);
 
 // Pino HTTP request logging
 app.use(

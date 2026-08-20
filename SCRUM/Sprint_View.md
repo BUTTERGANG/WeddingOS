@@ -11,10 +11,10 @@
 
 | Task | Agent | Priority | Est. |
 |------|-------|----------|------|
-| Timeline Planner Port | Hermes | P1 | 2 weeks |
-| Client Gallery w/ Proofing | Hermes | P1 | 2 weeks |
-| Email + Invoicing | Hermes | P1 | 1 week |
-| Client Portal | Hermes | P1 | 2 weeks |
+| Timeline Planner Port | Hermes | P1 | ✅ DONE |
+| Client Gallery w/ Proofing | Hermes | P1 | ✅ DONE |
+| Email + Stripe Invoicing | Hermes | P1 | ✅ DONE |
+| Client Portal | Hermes | P1 | ✅ DONE |
 
 ---
 

@@ -1,18 +1,14 @@
-modules = ["nodejs-20", "web"]
-run = "pnpm dev"
+modules = ["nodejs-22", "web"]
+run = "pnpm install && pnpm dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-25_05"
 
-[prepare]
-# Replit runs this before any workflow task
-pnpm = "install --frozen-lockfile"
-
 [deployment]
 deploymentTarget = "autoscale"
-build = ["pnpm", "run", "build"]
-run = ["pnpm", "run", "start"]
+build = ["sh", "-c", "pnpm install && pnpm run build"]
+run = ["sh", "-c", "pnpm run start"]
 
 [[ports]]
 localPort = 5000
@@ -28,22 +24,14 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Install dependencies"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Start application"
-
-[[workflows.workflow]]
-name = "Install dependencies"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "package.install"
 
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "package.install"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

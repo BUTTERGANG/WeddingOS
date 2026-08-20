@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
 import { api, apiUpload } from "@/lib/api";
 import type { Gallery, GalleryImage, PrintProduct, PrintOrder } from "@/lib/types";
+import { Image, Upload, X, Heart } from "lucide-react";
+import { Skeleton, EmptyState } from "@/components/ui";
 
 interface GalleryPageProps {
   clientId: string;
@@ -120,9 +122,7 @@ function GalleryDetail({
           <p className="text-sm text-brand-600">Drop images here...</p>
         ) : (
           <div>
-            <svg className="w-10 h-10 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <Upload className="w-10 h-10 mx-auto text-gray-300 mb-2" />
             <p className="text-sm text-gray-500">
               Drag & drop images, or click to browse
             </p>
@@ -132,11 +132,18 @@ function GalleryDetail({
 
       {/* Image grid */}
       {loading ? (
-        <div className="text-center py-8 text-gray-400">Loading images...</div>
-      ) : images.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-400">No images yet</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <Skeleton className="aspect-square rounded-lg" />
+          <Skeleton className="aspect-square rounded-lg" />
+          <Skeleton className="aspect-square rounded-lg" />
+          <Skeleton className="aspect-square rounded-lg" />
         </div>
+      ) : images.length === 0 ? (
+        <EmptyState
+          icon={Image}
+          title="No images yet"
+          description="Upload photos to get started"
+        />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {images.map((img) => (
@@ -152,7 +159,9 @@ function GalleryDetail({
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
               {img.isFavorite && (
-                <span className="absolute top-2 right-2 text-red-500 text-lg">❤️</span>
+                <span className="absolute top-2 right-2">
+                  <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+                </span>
               )}
             </button>
           ))}
@@ -199,9 +208,7 @@ function GalleryDetail({
                 className="text-gray-400 hover:text-gray-600 disabled:opacity-40"
                 disabled={placingOrder}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -460,9 +467,7 @@ function GalleryDetail({
             className="absolute top-4 right-4 text-white/80 hover:text-white"
             onClick={() => setLightboxImage(null)}
           >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-8 h-8" />
           </button>
           <img
             src={`/api/uploads/${lightboxImage.filename}`}
@@ -566,18 +571,25 @@ export default function GalleryPage({ clientId }: GalleryPageProps) {
         </div>
         <button
           onClick={() => setShowAdd(true)}
-          className="px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition-colors"
+          className="px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition-colors inline-flex items-center gap-2"
         >
+          <Upload className="w-4 h-4" />
           New Gallery
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading...</div>
-      ) : galleries.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-400">No galleries yet</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Skeleton className="h-40 w-full rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-xl" />
         </div>
+      ) : galleries.length === 0 ? (
+        <EmptyState
+          icon={Image}
+          title="No galleries yet"
+          description="Create a gallery to start sharing photos with your clients"
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {galleries.map((gallery) => (
@@ -608,9 +620,7 @@ export default function GalleryPage({ clientId }: GalleryPageProps) {
                 </p>
               )}
               <div className="flex items-center text-sm text-gray-400">
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <Image className="w-4 h-4 mr-1" />
                 {imageCounts[gallery.id] ?? 0} image(s)
               </div>
             </div>
@@ -625,9 +635,7 @@ export default function GalleryPage({ clientId }: GalleryPageProps) {
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">New Gallery</h2>
               <button onClick={() => setShowAdd(false)} className="text-gray-400 hover:text-gray-600">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleAdd} className="p-6 space-y-4">

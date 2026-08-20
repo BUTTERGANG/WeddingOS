@@ -3,6 +3,8 @@ import { useParams, Link } from "wouter";
 import { api } from "@/lib/api";
 import type { ExtendedVendor, VendorInquiry } from "@/lib/types";
 import toast from "react-hot-toast";
+import { Card, Badge, Button, Input, Select, EmptyState, LoadingSpinner } from "@/components/ui";
+import { MapPin, Globe, Phone, Mail, Calendar, MessageSquare, Send, ExternalLink, ArrowLeft } from "lucide-react";
 
 const SERVICE_CATEGORIES = [
   "Photography",
@@ -90,7 +92,7 @@ export default function MarketplaceVendorProfile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-500" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -119,9 +121,9 @@ export default function MarketplaceVendorProfile() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Link
             href="/marketplace"
-            className="text-sm text-brand-600 hover:text-brand-700 font-medium"
+            className="text-sm text-brand-600 hover:text-brand-700 font-medium inline-flex items-center gap-1"
           >
-            &larr; Back to Marketplace
+            <ArrowLeft className="w-4 h-4" /> Back to Marketplace
           </Link>
         </div>
       </header>
@@ -130,7 +132,7 @@ export default function MarketplaceVendorProfile() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Vendor Info */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <Card>
               {/* Profile header */}
               <div className="flex items-center gap-4">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center overflow-hidden">
@@ -151,7 +153,8 @@ export default function MarketplaceVendorProfile() {
                     {vendor.businessName || vendor.name}
                   </h1>
                   {(vendor.city || vendor.state) && (
-                    <p className="text-gray-500 mt-1">
+                    <p className="text-gray-500 mt-1 flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
                       {[vendor.city, vendor.state].filter(Boolean).join(", ")}
                     </p>
                   )}
@@ -171,17 +174,10 @@ export default function MarketplaceVendorProfile() {
               {/* Service Categories */}
               {vendor.serviceCategories && vendor.serviceCategories.length > 0 && (
                 <div className="mt-6">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    Services
-                  </h2>
+                  <h2 className="text-lg font-semibold text-gray-900">Services</h2>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {vendor.serviceCategories.map((cat) => (
-                      <span
-                        key={cat}
-                        className="px-3 py-1 bg-brand-50 text-brand-700 text-sm rounded-full"
-                      >
-                        {cat}
-                      </span>
+                      <Badge key={cat} variant="info">{cat}</Badge>
                     ))}
                   </div>
                 </div>
@@ -190,27 +186,27 @@ export default function MarketplaceVendorProfile() {
               {/* Website */}
               {vendor.businessWebsite && (
                 <div className="mt-6">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    Website
-                  </h2>
+                  <h2 className="text-lg font-semibold text-gray-900">Website</h2>
                   <a
                     href={vendor.businessWebsite}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 inline-block text-brand-600 hover:text-brand-700"
+                    className="mt-1 inline-flex items-center gap-1 text-brand-600 hover:text-brand-700"
                   >
+                    <Globe className="w-4 h-4" />
                     {vendor.businessWebsite}
+                    <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               )}
-            </div>
+            </Card>
           </div>
 
           {/* Contact Form */}
           <div>
-            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-6">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Send Inquiry
+            <Card className="sticky top-6">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" /> Send Inquiry
               </h2>
               <p className="text-sm text-gray-500 mt-1">
                 Interested in this vendor? Send them a message.
@@ -227,81 +223,51 @@ export default function MarketplaceVendorProfile() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Phone
-                    </label>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Wedding Date
-                    </label>
-                    <input
-                      type="date"
-                      value={weddingDate}
-                      onChange={(e) => setWeddingDate(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Venue
-                    </label>
-                    <input
-                      type="text"
-                      value={venue}
-                      onChange={(e) => setVenue(e.target.value)}
-                      placeholder="Wedding venue (optional)"
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Service Interest
-                    </label>
-                    <select
-                      value={serviceInterest}
-                      onChange={(e) => setServiceInterest(e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                    >
-                      <option value="">Select a service (optional)</option>
-                      {SERVICE_CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <Input
+                    label="Name *"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                  <Input
+                    label="Email *"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <Input
+                    label="Phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                  <Input
+                    label="Wedding Date"
+                    type="date"
+                    value={weddingDate}
+                    onChange={(e) => setWeddingDate(e.target.value)}
+                  />
+                  <Input
+                    label="Venue"
+                    type="text"
+                    value={venue}
+                    onChange={(e) => setVenue(e.target.value)}
+                    placeholder="Wedding venue (optional)"
+                  />
+                  <Select
+                    label="Service Interest"
+                    value={serviceInterest}
+                    onChange={(e) => setServiceInterest(e.target.value)}
+                  >
+                    <option value="">Select a service (optional)</option>
+                    {SERVICE_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </Select>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Message *
@@ -315,16 +281,18 @@ export default function MarketplaceVendorProfile() {
                       className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
                     />
                   </div>
-                  <button
+                  <Button
                     type="submit"
+                    variant="primary"
                     disabled={sending}
-                    className="w-full py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 font-medium text-sm disabled:opacity-50"
+                    loading={sending}
+                    className="w-full"
                   >
-                    {sending ? "Sending..." : "Send Inquiry"}
-                  </button>
+                    <Send className="w-4 h-4 mr-1" /> Send Inquiry
+                  </Button>
                 </form>
               )}
-            </div>
+            </Card>
           </div>
         </div>
       </main>

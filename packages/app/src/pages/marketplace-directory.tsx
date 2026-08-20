@@ -2,6 +2,8 @@ import { useState, useEffect, type FormEvent } from "react";
 import { Link } from "wouter";
 import { api } from "@/lib/api";
 import type { ExtendedVendor, MarketplaceListResponse } from "@/lib/types";
+import { Card, Badge, EmptyState, Skeleton, Input, LoadingSpinner } from "@/components/ui";
+import { Search, MapPin, Filter, Grid, ChevronDown } from "lucide-react";
 
 const SERVICE_CATEGORIES = [
   "Photography",
@@ -162,13 +164,14 @@ export default function MarketplaceDirectory() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-500" />
+            <LoadingSpinner size="lg" />
           </div>
         ) : vendors.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">No vendors found matching your criteria.</p>
-            <p className="text-gray-400 mt-1">Try adjusting your filters.</p>
-          </div>
+          <EmptyState
+            icon={Search}
+            title="No vendors found"
+            description="No vendors found matching your criteria. Try adjusting your filters."
+          />
         ) : (
           <>
             <p className="text-sm text-gray-500 mb-4">
@@ -202,19 +205,15 @@ export default function MarketplaceDirectory() {
                       {vendor.businessName || vendor.name}
                     </h3>
                     {(vendor.city || vendor.state) && (
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5" />
                         {[vendor.city, vendor.state].filter(Boolean).join(", ")}
                       </p>
                     )}
                     {vendor.serviceCategories && vendor.serviceCategories.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {vendor.serviceCategories.slice(0, 3).map((cat) => (
-                          <span
-                            key={cat}
-                            className="inline-block px-2 py-0.5 bg-brand-50 text-brand-700 text-xs rounded-full"
-                          >
-                            {cat}
-                          </span>
+                          <Badge key={cat} variant="info">{cat}</Badge>
                         ))}
                         {vendor.serviceCategories.length > 3 && (
                           <span className="text-xs text-gray-400">

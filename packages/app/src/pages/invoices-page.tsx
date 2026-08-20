@@ -3,19 +3,12 @@ import { Link } from "wouter";
 import toast from "react-hot-toast";
 import { api } from "@/lib/api";
 import type { Invoice, InvoiceLineItem } from "@/lib/types";
+import { Plus, CreditCard, Trash2, Eye, FileText } from "lucide-react";
+import { Button, Badge, EmptyState } from "@/components/ui";
 
 interface InvoicesPageProps {
   clientId: string;
 }
-
-const STATUS_BADGES: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-600",
-  sent: "bg-blue-100 text-blue-700",
-  paid: "bg-green-100 text-green-700",
-  overdue: "bg-red-100 text-red-700",
-  cancelled: "bg-gray-100 text-gray-500",
-  refunded: "bg-purple-100 text-purple-700",
-};
 
 function LineItemRow({
   item,
@@ -69,13 +62,20 @@ function LineItemRow({
         onClick={() => onRemove(index)}
         className="p-1.5 text-gray-400 hover:text-red-500 mb-1"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
+        <Trash2 className="w-4 h-4" />
       </button>
     </div>
   );
 }
+
+const STATUS_VARIANT: Record<string, "default" | "success" | "warning" | "danger" | "info" | "purple"> = {
+  draft: "default",
+  sent: "info",
+  paid: "success",
+  overdue: "danger",
+  cancelled: "default",
+  refunded: "purple",
+};
 
 export default function InvoicesPage({ clientId }: InvoicesPageProps) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -172,20 +172,20 @@ export default function InvoicesPage({ clientId }: InvoicesPageProps) {
           <h1 className="text-2xl font-bold text-gray-900">Invoices</h1>
           <p className="mt-1 text-sm text-gray-500">{invoices.length} invoices</p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition-colors"
-        >
+        <Button onClick={() => setShowAdd(true)}>
+          <Plus className="w-4 h-4 mr-1.5" />
           Create Invoice
-        </button>
+        </Button>
       </div>
 
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading...</div>
       ) : invoices.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-400">No invoices yet</p>
-        </div>
+        <EmptyState
+          icon={FileText}
+          title="No invoices yet"
+          description="Create your first invoice to bill your client"
+        />
       ) : (
         <div className="space-y-3">
           {invoices.map((inv) => (
@@ -198,11 +198,9 @@ export default function InvoicesPage({ clientId }: InvoicesPageProps) {
                   <h3 className="font-semibold text-gray-900">
                     {inv.invoiceNumber}
                   </h3>
-                  <span
-                    className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${STATUS_BADGES[inv.status] || "bg-gray-100 text-gray-600"}`}
-                  >
+                  <Badge variant={STATUS_VARIANT[inv.status] || "default"}>
                     {inv.status}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
                   ${(inv.amountCents / 100).toLocaleString()}
@@ -210,15 +208,15 @@ export default function InvoicesPage({ clientId }: InvoicesPageProps) {
                 </p>
               </div>
               {inv.status === "sent" && (
-                <button
-                  onClick={() => markPaid(inv.id)}
-                  className="px-3 py-1.5 text-sm font-medium bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-                >
+                <Button variant="secondary" size="sm" onClick={() => markPaid(inv.id)}>
+                  <CreditCard className="w-4 h-4 mr-1" />
                   Mark Paid
-                </button>
+                </Button>
               )}
               {inv.status === "draft" && (
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={async () => {
                     try {
                       await api(`/invoices/${inv.id}`, { method: "PUT", body: { status: "sent" } });
@@ -228,10 +226,9 @@ export default function InvoicesPage({ clientId }: InvoicesPageProps) {
                       toast.error("Failed to send invoice");
                     }
                   }}
-                  className="px-3 py-1.5 text-sm font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
                 >
                   Mark Sent
-                </button>
+                </Button>
               )}
             </div>
           ))}
@@ -259,7 +256,9 @@ export default function InvoicesPage({ clientId }: InvoicesPageProps) {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium text-gray-700">Line Items</h3>
-                  <button type="button" onClick={addLineItem} className="text-sm text-brand-600 hover:text-brand-700 font-medium">+ Add Item</button>
+                  <button type="button" onClick={addLineItem} className="text-sm text-brand-600 hover:text-brand-700 font-medium inline-flex items-center gap-1">
+                    <Plus className="w-3.5 h-3.5" /> Add Item
+                  </button>
                 </div>
                 {lineItems.map((item, i) => (
                   <LineItemRow
@@ -280,9 +279,10 @@ export default function InvoicesPage({ clientId }: InvoicesPageProps) {
 
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowAdd(false)} className="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-                <button type="submit" disabled={lineItems.some((i) => !i.description)} className="flex-1 py-2.5 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 disabled:opacity-50 transition-colors">
+                <Button type="submit" disabled={lineItems.some((i) => !i.description)} className="flex-1">
+                  <CreditCard className="w-4 h-4 mr-1.5" />
                   Create Invoice (${grandTotal.toFixed(2)})
-                </button>
+                </Button>
               </div>
             </form>
           </div>

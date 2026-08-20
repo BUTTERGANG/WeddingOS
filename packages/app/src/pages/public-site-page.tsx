@@ -3,6 +3,8 @@ import { useRoute, Link } from "wouter";
 import { api } from "@/lib/api";
 import { SEO } from "@/components/seo";
 import type { SitePage } from "@/lib/types";
+import { Card, EmptyState, Skeleton } from "@/components/ui";
+import { FileText } from "lucide-react";
 
 function getVendorId(): number {
   const fromStorage = localStorage.getItem("publicVendorId");
@@ -36,7 +38,10 @@ export default function PublicSitePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
+        <div className="space-y-4 w-96">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-64 w-full" />
+        </div>
       </div>
     );
   }
@@ -44,10 +49,11 @@ export default function PublicSitePage() {
   if (!page) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Page not found</h1>
-          <p className="text-gray-500 mb-4">The page you're looking for doesn't exist.</p>
-        </div>
+        <EmptyState
+          icon={FileText}
+          title="Page not found"
+          description="The page you're looking for doesn't exist."
+        />
       </div>
     );
   }

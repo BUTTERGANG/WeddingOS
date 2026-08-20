@@ -3,6 +3,7 @@ import { useLocation, useRoute } from "wouter";
 import { api } from "@/lib/api";
 import type { SitePage } from "@/lib/types";
 import toast from "react-hot-toast";
+import { Button, Input, PageHeader, Skeleton } from "@/components/ui";
 
 export default function SitePageEditorPage() {
   const [, setLocation] = useLocation();
@@ -76,50 +77,47 @@ export default function SitePageEditorPage() {
   };
 
   if (loading) {
-    return <div className="p-12 text-center text-gray-500">Loading...</div>;
+    return (
+      <div className="max-w-4xl mx-auto p-12">
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Edit Page</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={handleDelete}
-            className="px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 text-sm font-medium"
-          >
-            Delete
-          </button>
-          <button
-            onClick={() => setLocation("/site-pages")}
-            className="px-4 py-2 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 text-sm font-medium"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Edit Page"
+        actions={
+          <div className="flex gap-2">
+            <Button variant="danger" size="sm" onClick={handleDelete}>
+              Delete
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => setLocation("/site-pages")}>
+              Cancel
+            </Button>
+          </div>
+        }
+      />
 
       <div className="space-y-6">
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-medium text-gray-900">Content</h2>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              placeholder="Page title"
-            />
-          </div>
+          <Input
+            label="Title *"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Page title"
+          />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Content
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -132,7 +130,6 @@ export default function SitePageEditorPage() {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-medium text-gray-900">Settings</h2>
-
           <div className="flex gap-6">
             <label className="flex items-center gap-2">
               <input
@@ -158,23 +155,16 @@ export default function SitePageEditorPage() {
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-medium text-gray-900">SEO</h2>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              SEO Title
-            </label>
-            <input
-              type="text"
-              value={seoTitle}
-              onChange={(e) => setSeoTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              placeholder="Custom page title for search engines"
-            />
-          </div>
+          <Input
+            label="SEO Title"
+            type="text"
+            value={seoTitle}
+            onChange={(e) => setSeoTitle(e.target.value)}
+            placeholder="Custom page title for search engines"
+          />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              SEO Description
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">SEO Description</label>
             <textarea
               value={seoDescription}
               onChange={(e) => setSeoDescription(e.target.value)}
@@ -186,13 +176,9 @@ export default function SitePageEditorPage() {
         </div>
 
         <div className="flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 disabled:opacity-50 text-sm font-medium"
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
+          <Button variant="primary" onClick={handleSave} disabled={saving} loading={saving}>
+            Save Changes
+          </Button>
         </div>
       </div>
     </div>

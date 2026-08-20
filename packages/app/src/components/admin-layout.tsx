@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { api } from "@/lib/api";
+import { Menu, LogOut, Shield } from "lucide-react";
 
 const adminNavItems = [
   { href: "/admin", label: "Dashboard" },
@@ -76,19 +77,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             onClick={handleLogout}
             className="w-full flex items-center px-3 py-2 text-sm text-gray-400 rounded-lg hover:bg-gray-700 hover:text-gray-200 transition-colors"
           >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
+            <LogOut className="w-4 h-4 mr-2" />
             Sign out
           </button>
         </div>
@@ -103,19 +92,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             className="p-2 rounded-md text-gray-400 hover:bg-gray-700"
             aria-label="Open sidebar"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
+            <Menu className="w-6 h-6" />
           </button>
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">

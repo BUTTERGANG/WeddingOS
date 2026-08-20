@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { api } from "@/lib/api";
 import type { SitePage } from "@/lib/types";
 import toast from "react-hot-toast";
+import { Card, Badge, Button, EmptyState, PageHeader, Skeleton } from "@/components/ui";
+import { Plus, Pencil, Eye, Trash2, Home, FileText } from "lucide-react";
 
 export default function SitePagesPage() {
   const [, setLocation] = useLocation();
@@ -106,114 +108,103 @@ export default function SitePagesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Site Pages</h1>
-        <button
-          onClick={() => setShowNewForm(!showNewForm)}
-          className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 text-sm font-medium"
-        >
-          {showNewForm ? "Cancel" : "New Page"}
-        </button>
-      </div>
+      <PageHeader
+        title="Site Pages"
+        actions={
+          <Button variant="primary" size="sm" onClick={() => setShowNewForm(!showNewForm)}>
+            {showNewForm ? "Cancel" : <><Plus className="w-4 h-4 mr-1" /> New Page</>}
+          </Button>
+        }
+      />
 
       {/* New page form */}
       {showNewForm && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6 space-y-4">
-          <h2 className="text-lg font-medium text-gray-900">New Page</h2>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
-              placeholder="About Us"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Content
-            </label>
-            <textarea
-              value={newContent}
-              onChange={(e) => setNewContent(e.target.value)}
-              rows={8}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono text-sm"
-              placeholder="Page content..."
-            />
-          </div>
-
-          <div className="flex gap-6">
-            <label className="flex items-center gap-2">
+        <Card className="mb-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">New Page</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
               <input
-                type="checkbox"
-                checked={newIsPublished}
-                onChange={(e) => setNewIsPublished(e.target.checked)}
-                className="rounded border-gray-300 text-brand-500 focus:ring-brand-500"
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+                placeholder="About Us"
               />
-              <span className="text-sm text-gray-700">Published</span>
-            </label>
-            <label className="flex items-center gap-2">
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+              <textarea
+                value={newContent}
+                onChange={(e) => setNewContent(e.target.value)}
+                rows={8}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono text-sm"
+                placeholder="Page content..."
+              />
+            </div>
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={newIsPublished}
+                  onChange={(e) => setNewIsPublished(e.target.checked)}
+                  className="rounded border-gray-300 text-brand-500 focus:ring-brand-500"
+                />
+                <span className="text-sm text-gray-700">Published</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={newIsHomepage}
+                  onChange={(e) => setNewIsHomepage(e.target.checked)}
+                  className="rounded border-gray-300 text-brand-500 focus:ring-brand-500"
+                />
+                <span className="text-sm text-gray-700">Set as Homepage</span>
+              </label>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">SEO Title</label>
               <input
-                type="checkbox"
-                checked={newIsHomepage}
-                onChange={(e) => setNewIsHomepage(e.target.checked)}
-                className="rounded border-gray-300 text-brand-500 focus:ring-brand-500"
+                type="text"
+                value={newSeoTitle}
+                onChange={(e) => setNewSeoTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+                placeholder="Custom page title for SEO"
               />
-              <span className="text-sm text-gray-700">Set as Homepage</span>
-            </label>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">SEO Description</label>
+              <textarea
+                value={newSeoDescription}
+                onChange={(e) => setNewSeoDescription(e.target.value)}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
+                placeholder="Meta description"
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button variant="primary" onClick={handleCreate} disabled={creating} loading={creating}>
+                Create Page
+              </Button>
+            </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              SEO Title
-            </label>
-            <input
-              type="text"
-              value={newSeoTitle}
-              onChange={(e) => setNewSeoTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
-              placeholder="Custom page title for SEO"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              SEO Description
-            </label>
-            <textarea
-              value={newSeoDescription}
-              onChange={(e) => setNewSeoDescription(e.target.value)}
-              rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"
-              placeholder="Meta description"
-            />
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              onClick={handleCreate}
-              disabled={creating}
-              className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 disabled:opacity-50 text-sm font-medium"
-            >
-              {creating ? "Creating..." : "Create Page"}
-            </button>
-          </div>
-        </div>
+        </Card>
       )}
 
       {/* Pages table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-gray-500">Loading...</div>
-        ) : pages.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            No pages yet. Create your first page above.
+          <div className="p-12 space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
           </div>
+        ) : pages.length === 0 ? (
+          <EmptyState
+            icon={FileText}
+            title="No pages yet"
+            description="Create your first page above."
+          />
         ) : (
           <table className="w-full">
             <thead>
@@ -233,41 +224,38 @@ export default function SitePagesPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">{page.slug}</td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => togglePublish(page)}
-                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                        page.isPublished
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {page.isPublished ? "Published" : "Draft"}
+                    <button onClick={() => togglePublish(page)}>
+                      <Badge variant={page.isPublished ? "success" : "default"}>
+                        {page.isPublished ? "Published" : "Draft"}
+                      </Badge>
                     </button>
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => toggleHomepage(page)}
-                      className={`text-xs font-medium ${
-                        page.isHomepage ? "text-brand-600" : "text-gray-400 hover:text-gray-600"
-                      }`}
-                    >
-                      {page.isHomepage ? "✓ Homepage" : "Set as Homepage"}
-                    </button>
+                    {page.isHomepage ? (
+                      <Badge variant="purple">
+                        <Home className="w-3 h-3 mr-1 inline" /> Homepage
+                      </Badge>
+                    ) : (
+                      <button
+                        onClick={() => toggleHomepage(page)}
+                        className="text-xs font-medium text-gray-400 hover:text-gray-600"
+                      >
+                        Set as Homepage
+                      </button>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setLocation(`/site-pages/${page.id}/edit`)}
-                        className="text-sm text-brand-600 hover:text-brand-700"
                       >
                         Edit
-                      </button>
-                      <button
-                        onClick={() => deletePage(page.id)}
-                        className="text-sm text-red-500 hover:text-red-700"
-                      >
+                      </Button>
+                      <Button variant="danger" size="sm" onClick={() => deletePage(page.id)}>
                         Delete
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>

@@ -21,51 +21,55 @@ The wedding vendor software market is fragmented. Photographers juggle:
 
 ---
 
-## What We Already Have (Reusable Assets)
+## What We Already Have
 
 | Module | Source Repo | Status |
 |--------|-------------|--------|
-| Timeline builder + guest management | WEDDINGTIMELINE | Core built, needs multi-tenant |
-| Email delivery + 2FA + transactional | MORAN-WEBSITE | Production-tested (AgentMail, SMTP fallback) |
-| Stripe payments + webhooks | MORAN-WEBSITE | Production-tested (checkout, refunds, tax, shipping) |
-| Media gallery + lightbox + video | LA-MEDIA-WEBSITE | Built, needs client auth + proofing |
-| Pricing calculator (50-state) | PHOTO | Standalone HTML, needs integration |
-| Market research ($16.2B industry data) | PHOTO | Complete |
-| Print store (Printify sync) | MORAN-WEBSITE | Production-tested, needs photo-lab adapter |
-| Auth (session, roles, 2FA, passwordless) | MORAN-WEBSITE | Production-tested |
-| Vendor/contact database | PHOTO | Research data, needs app integration |
+| Timeline builder + guest management | WEDDINGTIMELINE | ✅ Core built, needs multi-tenant |
+| Email delivery + 2FA + transactional | MORAN-WEBSITE | ✅ Production-tested (AgentMail, SMTP fallback) |
+| Stripe payments + webhooks | MORAN-WEBSITE | ✅ Production-tested (checkout, refunds, tax, shipping) |
+| Media gallery + lightbox + video | LA-MEDIA-WEBSITE | ✅ Built, needs client auth + proofing |
+| Pricing calculator (50-state) | PHOTO | ✅ Standalone HTML, needs integration |
+| Market research ($16.2B industry data) | PHOTO | ✅ Complete |
+| Print store (Printify sync) | MORAN-WEBSITE | ✅ Production-tested, needs photo-lab adapter |
+| Auth (session, roles, 2FA, passwordless) | MORAN-WEBSITE | ✅ Production-tested |
+| Vendor/contact database | PHOTO | ✅ Research data, needs app integration |
+| UI Component Library (lucide-react + Tailwind) | WeddingOS | ✅ Reusable components (Button, Badge, Card, Skeleton, EmptyState, Input, Select, PageHeader, LoadingSpinner) |
+| DESIGN.md Design System | WeddingOS | ✅ Documented brand colors, typography, and component reference |
 
 ---
 
-## Roadmap
+## Features
 
-### Phase 1 — MVP (6-8 weeks)
-Single-tenant, single vendor manages their studio through WeddingOS.
+### ✅ Timeline Planner
+Drag-and-drop wedding timeline builder with sortable events, categories, and color coding. Ported from WEDDINGTIMELINE.
 
-- [ ] Timeline planner (port from WEDDINGTIMELINE)
-- [ ] Client gallery with password-protected proofing
-- [ ] Email transactions (AgentMail)
-- [ ] Invoicing + payments (Stripe)
-- [ ] Client portal (adapt MORAN athlete portal)
-- [ ] Pricing calculator tool
+### ✅ Client Galleries
+Password-protected photo galleries with lightbox viewing, drag-and-drop upload, and print storefront integration.
 
-### Phase 2 — Revenue Features (Weeks 9-12)
-- [x] Contract builder + e-signature
-- [x] Calendar booking (public embed for clients)
-- [x] Print store (photo lab API — Mpix/WHCC)
-- [ ] Blog/SEO website pages
+### ✅ Invoicing & Payments
+Create invoices with line items, track status (draft/sent/paid/overdue), Stripe integration.
 
-### Phase 3 — Moats (Weeks 13-16)
-- [x] AI pricing recommendations
-- [ ] Multi-tenant architecture
-- [ ] Multi-vendor workflows
-- [ ] Vendor finder/marketplace
+### ✅ Contract Builder & E-Signature
+Templated contracts with merge fields ({clientName}, {weddingDate}, etc.), send-for-signature workflow, and PDF download.
 
----
+### ✅ Calendar Booking
+Public booking embed with available slots, service type selection, and booking management. Powered by react-day-picker.
 
-## SCRUM Board
+### ✅ Blog & SEO Website Pages
+Full blog engine with categories, tags, SEO metadata, scheduled publishing. Custom site pages with homepage selection.
 
-Feature work is tracked in `SCRUM/`. See `templates/scrum_reference.md` in AGENT-PLAYBOOK for the claiming protocol.
+### ✅ Vendor Marketplace
+Directory of wedding vendors with search, filtering by service category/location, vendor profiles, and inquiry system.
+
+### ✅ Partner Management
+Multi-vendor collaboration with shared client records, partner connections, and shared client views.
+
+### ✅ Print Store
+Photo print ordering via integrated print store with product categories (prints, canvas, metal, books), cart management, and checkout.
+
+### ✅ UI Component Library
+Consistent design system with reusable components built on Tailwind CSS and lucide-react icons. See `DESIGN.md` for full reference.
 
 ---
 

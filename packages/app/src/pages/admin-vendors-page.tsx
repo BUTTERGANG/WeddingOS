@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
+import { Card, Badge, Button, EmptyState, PageHeader, Input } from "@/components/ui";
+import { Search, Eye, Users, Shield, X } from "lucide-react";
 
 interface AdminVendor {
   id: number;
@@ -108,32 +110,28 @@ export default function AdminVendorsPage() {
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100">Vendor Management</h1>
-        <p className="mt-1 text-gray-400">
-          {total} vendor{total !== 1 ? "s" : ""} registered
-        </p>
-      </div>
+      <PageHeader
+        title="Vendor Management"
+        description={`${total} vendor${total !== 1 ? "s" : ""} registered`}
+      />
 
       {/* Search */}
       <form onSubmit={handleSearch} className="flex gap-2">
-        <input
+        <Input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search vendors by name, email, or business..."
-          className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          className="flex-1 bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500"
         />
-        <button
-          type="submit"
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
-        >
+        <Button type="submit">
+          <Search className="w-4 h-4 mr-2" />
           Search
-        </button>
+        </Button>
       </form>
 
       {/* Vendor Table */}
-      <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+      <Card className="bg-gray-800 border-gray-700 overflow-hidden p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -154,8 +152,12 @@ export default function AdminVendorsPage() {
                 </tr>
               ) : vendors.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                    No vendors found
+                  <td colSpan={5} className="px-4 py-8 text-center">
+                    <EmptyState
+                      icon={Users}
+                      title="No vendors found"
+                      description="Try a different search term."
+                    />
                   </td>
                 </tr>
               ) : (
@@ -170,7 +172,7 @@ export default function AdminVendorsPage() {
                     </td>
                     <td className="px-4 py-3 text-gray-300">{vendor.email}</td>
                     <td className="px-4 py-3 text-gray-400">
-                      {vendor.businessName || "—"}
+                      {vendor.businessName || "\u2014"}
                     </td>
                     <td className="px-4 py-3 text-center text-gray-300">
                       {vendor.clientCount}
@@ -178,7 +180,7 @@ export default function AdminVendorsPage() {
                     <td className="px-4 py-3 text-gray-400">
                       {vendor.createdAt
                         ? new Date(vendor.createdAt).toLocaleDateString()
-                        : "—"}
+                        : "\u2014"}
                     </td>
                   </tr>
                 ))
@@ -194,42 +196,45 @@ export default function AdminVendorsPage() {
               Page {page} of {totalPages}
             </p>
             <div className="flex gap-2">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="px-3 py-1 text-sm rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
-                className="px-3 py-1 text-sm rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
-              </button>
+              </Button>
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Vendor Detail Panel */}
       {selectedVendor && (
-        <div className="bg-gray-800 rounded-xl border border-gray-700 p-5">
+        <Card className="bg-gray-800 border-gray-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-100">
               {selectedVendor.name}
             </h2>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 setSelectedVendor(null);
                 setVendorDetail(null);
                 setVendorStats(null);
               }}
-              className="text-sm text-gray-400 hover:text-gray-200"
             >
-              Close
-            </button>
+              <X className="w-4 h-4" />
+            </Button>
           </div>
 
           {detailLoading ? (
@@ -253,19 +258,19 @@ export default function AdminVendorsPage() {
                   <div className="flex justify-between">
                     <span className="text-gray-400 text-sm">Business</span>
                     <span className="text-gray-100 text-sm">
-                      {vendorDetail?.businessName || "—"}
+                      {vendorDetail?.businessName || "\u2014"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400 text-sm">Website</span>
                     <span className="text-gray-100 text-sm">
-                      {vendorDetail?.businessWebsite || "—"}
+                      {vendorDetail?.businessWebsite || "\u2014"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400 text-sm">Phone</span>
                     <span className="text-gray-100 text-sm">
-                      {vendorDetail?.phone || "—"}
+                      {vendorDetail?.phone || "\u2014"}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -349,7 +354,7 @@ export default function AdminVendorsPage() {
               )}
             </div>
           )}
-        </div>
+        </Card>
       )}
     </div>
   );

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
+import { Card, Button, Input, PageHeader } from "@/components/ui";
+import { Plus, Pencil, Trash2, Settings, X } from "lucide-react";
 
 interface PlatformSetting {
   id: number;
@@ -124,22 +126,16 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-100">
-            Platform Settings
-          </h1>
-          <p className="mt-1 text-gray-400">
-            {settings.length} setting{settings.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-        <button
-          onClick={() => setShowNewForm(true)}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
-        >
-          Add Setting
-        </button>
-      </div>
+      <PageHeader
+        title="Platform Settings"
+        description={`${settings.length} setting${settings.length !== 1 ? "s" : ""}`}
+        actions={
+          <Button onClick={() => setShowNewForm(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Setting
+          </Button>
+        }
+      />
 
       {/* Notifications */}
       {error && (
@@ -162,17 +158,14 @@ export default function AdminSettingsPage() {
           <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
             New Setting
           </h3>
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Key</label>
-            <input
-              type="text"
-              value={newKey}
-              onChange={(e) => setNewKey(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="site_name"
-              required
-            />
-          </div>
+          <Input
+            label="Key"
+            type="text"
+            value={newKey}
+            onChange={(e) => setNewKey(e.target.value)}
+            placeholder="site_name"
+            required
+          />
           <div>
             <label className="block text-sm text-gray-300 mb-1">
               Value (JSON)
@@ -182,36 +175,30 @@ export default function AdminSettingsPage() {
               onChange={(e) => setNewValue(e.target.value)}
               rows={3}
               className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder='"WeddingOS"'
+              placeholder={'"WeddingOS"'}
               required
             />
           </div>
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">
-              Description
-            </label>
-            <input
-              type="text"
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Optional description"
-            />
-          </div>
+          <Input
+            label="Description"
+            type="text"
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            placeholder="Optional description"
+          />
           <div className="flex gap-2">
-            <button
-              type="submit"
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
-            >
+            <Button type="submit">
+              <Plus className="w-4 h-4 mr-2" />
               Create
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               type="button"
               onClick={() => setShowNewForm(false)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium rounded-lg transition-colors"
             >
+              <X className="w-4 h-4 mr-2" />
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       )}
@@ -223,14 +210,15 @@ export default function AdminSettingsPage() {
         </div>
       ) : settings.length === 0 ? (
         <div className="bg-gray-800 rounded-xl border border-gray-700 p-8 text-center">
+          <Settings className="w-12 h-12 text-gray-500 mx-auto mb-3" />
           <p className="text-gray-400">No settings configured yet</p>
         </div>
       ) : (
         <div className="space-y-3">
           {settings.map((setting) => (
-            <div
+            <Card
               key={setting.id}
-              className="bg-gray-800 rounded-xl border border-gray-700 p-4"
+              className="bg-gray-800 border-gray-700 p-4"
             >
               {editingKey === setting.key ? (
                 <div className="space-y-3">
@@ -250,30 +238,27 @@ export default function AdminSettingsPage() {
                       className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">
-                      Description
-                    </label>
-                    <input
-                      type="text"
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                  </div>
+                  <Input
+                    label="Description"
+                    type="text"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                  />
                   <div className="flex gap-2">
-                    <button
+                    <Button
+                      size="sm"
                       onClick={() => saveEdit(setting.key)}
-                      className="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                     >
                       Save
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => setEditingKey(null)}
-                      className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors"
                     >
+                      <X className="w-4 h-4 mr-1.5" />
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -285,7 +270,7 @@ export default function AdminSettingsPage() {
                       </span>
                       {setting.description && (
                         <span className="text-xs text-gray-500 truncate">
-                          — {setting.description}
+                          &mdash; {setting.description}
                         </span>
                       )}
                     </div>
@@ -294,22 +279,26 @@ export default function AdminSettingsPage() {
                     </pre>
                   </div>
                   <div className="flex items-center gap-2 ml-4 flex-shrink-0">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => startEdit(setting)}
-                      className="px-3 py-1.5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
                     >
+                      <Pencil className="w-4 h-4 mr-1.5" />
                       Edit
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
                       onClick={() => deleteSetting(setting.key)}
-                      className="px-3 py-1.5 text-sm bg-red-700 hover:bg-red-600 text-white rounded-lg transition-colors"
                     >
+                      <Trash2 className="w-4 h-4 mr-1.5" />
                       Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
           ))}
         </div>
       )}

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import type { BlogCategory } from "@/lib/types";
 import toast from "react-hot-toast";
+import { Card, Badge, Button, EmptyState, PageHeader, Skeleton } from "@/components/ui";
+import { Tag } from "lucide-react";
 
 export default function BlogCategoriesPage() {
   const [categories, setCategories] = useState<BlogCategory[]>([]);
@@ -70,12 +72,10 @@ export default function BlogCategoriesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Blog Categories</h1>
-      </div>
+      <PageHeader title="Blog Categories" />
 
       {/* New category */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+      <Card className="mb-6">
         <div className="flex gap-2">
           <input
             type="text"
@@ -85,39 +85,34 @@ export default function BlogCategoriesPage() {
             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
             placeholder="New category name"
           />
-          <button
-            onClick={handleCreate}
-            className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 text-sm font-medium"
-          >
+          <Button variant="primary" size="sm" onClick={handleCreate}>
             Add
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
       {/* Categories list */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-gray-500">Loading...</div>
-        ) : categories.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            No categories yet. Create your first one above.
+          <div className="p-12 space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
           </div>
+        ) : categories.length === 0 ? (
+          <EmptyState
+            icon={Tag}
+            title="No categories yet"
+            description="Create your first one above."
+          />
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
-                  Name
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
-                  Slug
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">
-                  Sort Order
-                </th>
-                <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">
-                  Actions
-                </th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Name</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Slug</th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Sort Order</th>
+                <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -144,46 +139,36 @@ export default function BlogCategoriesPage() {
                       </td>
                       <td className="px-4 py-2 text-right">
                         <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleUpdate(cat.id)}
-                            className="text-sm text-brand-600 hover:text-brand-700"
-                          >
+                          <Button variant="primary" size="sm" onClick={() => handleUpdate(cat.id)}>
                             Save
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="text-sm text-gray-400 hover:text-gray-600"
-                          >
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
                             Cancel
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </>
                   ) : (
                     <>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                        {cat.name}
-                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{cat.name}</td>
                       <td className="px-4 py-3 text-sm text-gray-500">{cat.slug}</td>
                       <td className="px-4 py-3 text-sm text-gray-500">{cat.sortOrder}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-2">
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => {
                               setEditingId(cat.id);
                               setEditName(cat.name);
                               setEditSortOrder(cat.sortOrder);
                             }}
-                            className="text-sm text-brand-600 hover:text-brand-700"
                           >
                             Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(cat.id)}
-                            className="text-sm text-red-500 hover:text-red-700"
-                          >
+                          </Button>
+                          <Button variant="danger" size="sm" onClick={() => handleDelete(cat.id)}>
                             Delete
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </>

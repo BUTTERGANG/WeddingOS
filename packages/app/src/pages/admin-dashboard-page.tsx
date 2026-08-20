@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { api } from "@/lib/api";
+import { Card } from "@/components/ui";
+import { Users, BarChart3, FileText, DollarSign, Eye } from "lucide-react";
 
 interface AdminStats {
   totalVendors: number;
@@ -31,6 +33,16 @@ function formatCents(cents: number): string {
     maximumFractionDigits: 2,
   })}`;
 }
+
+const statIconMap: Record<string, React.ElementType> = {
+  "Total Vendors": Users,
+  "Active Vendors": Users,
+  "Total Clients": Users,
+  "Total Invoices": FileText,
+  "Paid Invoices": BarChart3,
+  Revenue: DollarSign,
+  "Total Contracts": FileText,
+};
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -72,25 +84,32 @@ export default function AdminDashboardPage() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-        {statCards.map((card) => (
-          <div
-            key={card.label}
-            className="bg-gray-800 rounded-xl border border-gray-700 p-4"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-2.5 h-2.5 rounded-full ${card.color}`} />
-              <span className="text-xs text-gray-400">{card.label}</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-100">{card.value}</p>
-          </div>
-        ))}
+        {statCards.map((card) => {
+          const IconComponent = statIconMap[card.label] || Users;
+          return (
+            <Card
+              key={card.label}
+              className="bg-gray-800 border-gray-700 p-4"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`w-2.5 h-2.5 rounded-full ${card.color}`} />
+                <span className="text-xs text-gray-400 flex items-center gap-1">
+                  <IconComponent className="w-3.5 h-3.5" />
+                  {card.label}
+                </span>
+              </div>
+              <p className="text-2xl font-bold text-gray-100">{card.value}</p>
+            </Card>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Vendors */}
-        <div className="bg-gray-800 rounded-xl border border-gray-700 p-5">
+        <Card className="bg-gray-800 border-gray-700 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-100">
+            <h2 className="text-lg font-semibold text-gray-100 flex items-center gap-2">
+              <Eye className="w-4 h-4 text-indigo-400" />
               Recent Vendors
             </h2>
             <Link
@@ -125,10 +144,10 @@ export default function AdminDashboardPage() {
           ) : (
             <p className="text-sm text-gray-500">No vendors registered yet</p>
           )}
-        </div>
+        </Card>
 
         {/* Quick Links */}
-        <div className="bg-gray-800 rounded-xl border border-gray-700 p-5">
+        <Card className="bg-gray-800 border-gray-700 p-5">
           <h2 className="text-lg font-semibold text-gray-100 mb-4">
             Quick Links
           </h2>
@@ -156,7 +175,7 @@ export default function AdminDashboardPage() {
               </p>
             </Link>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

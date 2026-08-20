@@ -2,12 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { api } from "@/lib/api";
 import type { BlogPost } from "@/lib/types";
-
-const statusColors: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  published: "bg-green-100 text-green-700",
-  scheduled: "bg-blue-100 text-blue-700",
-};
+import { Button, Badge, EmptyState, PageHeader, Skeleton } from "@/components/ui";
+import { Plus, BookOpen } from "lucide-react";
 
 export default function BlogListPage() {
   const [, setLocation] = useLocation();
@@ -51,15 +47,14 @@ export default function BlogListPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Blog Posts</h1>
-        <button
-          onClick={() => setLocation("/blog/new")}
-          className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 text-sm font-medium"
-        >
-          New Post
-        </button>
-      </div>
+      <PageHeader
+        title="Blog Posts"
+        actions={
+          <Button variant="primary" size="sm" onClick={() => setLocation("/blog/new")}>
+            <Plus className="w-4 h-4 mr-1" /> New Post
+          </Button>
+        }
+      />
 
       {/* Status filter */}
       <div className="flex gap-2 mb-4">
@@ -84,9 +79,17 @@ export default function BlogListPage() {
       {/* Posts table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-gray-500">Loading...</div>
+          <div className="p-12 space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
         ) : posts.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">No posts yet. Create your first blog post!</div>
+          <EmptyState
+            icon={BookOpen}
+            title="No posts yet"
+            description="Create your first blog post!"
+          />
         ) : (
           <table className="w-full">
             <thead>
@@ -110,13 +113,15 @@ export default function BlogListPage() {
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                        statusColors[post.status] || "bg-gray-100 text-gray-700"
-                      }`}
+                    <Badge
+                      variant={
+                        post.status === "published" ? "success"
+                        : post.status === "scheduled" ? "info"
+                        : "default"
+                      }
                     >
                       {post.status}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {post.category?.name || "-"}
@@ -128,18 +133,12 @@ export default function BlogListPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
-                      <Link
-                        href={`/blog/${post.id}/edit`}
-                        className="text-sm text-brand-600 hover:text-brand-700"
-                      >
-                        Edit
+                      <Link href={`/blog/${post.id}/edit`}>
+                        <Button variant="ghost" size="sm">Edit</Button>
                       </Link>
-                      <button
-                        onClick={() => deletePost(post.id)}
-                        className="text-sm text-red-500 hover:text-red-700"
-                      >
+                      <Button variant="danger" size="sm" onClick={() => deletePost(post.id)}>
                         Delete
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -152,23 +151,25 @@ export default function BlogListPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-4">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="px-3 py-1.5 rounded text-sm bg-gray-100 disabled:opacity-50"
           >
             Prev
-          </button>
+          </Button>
           <span className="px-3 py-1.5 text-sm text-gray-500">
             Page {page} of {totalPages}
           </span>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="px-3 py-1.5 rounded text-sm bg-gray-100 disabled:opacity-50"
           >
             Next
-          </button>
+          </Button>
         </div>
       )}
     </div>

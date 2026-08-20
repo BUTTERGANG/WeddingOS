@@ -5,6 +5,8 @@ import type {
   VendorSearchResult,
 } from "@/lib/types";
 import toast from "react-hot-toast";
+import { Card, Badge, Button, EmptyState, PageHeader, Input } from "@/components/ui";
+import { Users, UserPlus, UserCheck, UserX, Search, MessageSquare, X, Check } from "lucide-react";
 
 export default function PartnerManagementPage() {
   const [connections, setConnections] = useState<PartnerConnection[]>([]);
@@ -116,29 +118,30 @@ export default function PartnerManagementPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
-      <h1 className="text-2xl font-bold text-gray-900">Partner Management</h1>
+      <PageHeader title="Partner Management" />
 
       {/* Find Partners */}
-      <section className="bg-white rounded-lg border border-gray-200 p-6">
+      <Card className="p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Find Partners
         </h2>
         <div className="flex gap-2 mb-4">
-          <input
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             placeholder="Search by name, email, or business name..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="flex-1"
           />
-          <button
+          <Button
             onClick={handleSearch}
             disabled={searching || searchQuery.length < 2}
-            className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 disabled:opacity-50"
+            loading={searching}
           >
+            <Search className="w-4 h-4 mr-2" />
             {searching ? "Searching..." : "Search"}
-          </button>
+          </Button>
         </div>
 
         {searchResults.length > 0 && (
@@ -154,31 +157,38 @@ export default function PartnerManagementPage() {
                   </p>
                   <p className="text-xs text-gray-500">{v.email}</p>
                 </div>
-                <button
+                <Button
+                  size="sm"
                   onClick={() => handleSendRequest(v.id)}
-                  className="px-3 py-1.5 text-sm bg-brand-500 text-white rounded-lg hover:bg-brand-600"
                 >
+                  <UserPlus className="w-4 h-4 mr-1.5" />
                   Send Request
-                </button>
+                </Button>
               </div>
             ))}
           </div>
         )}
 
         {searchQuery.length >= 2 && searchResults.length === 0 && !searching && (
-          <p className="text-sm text-gray-500">No vendors found</p>
+          <EmptyState
+            icon={Users}
+            title="No vendors found"
+            description="Try a different search term"
+          />
         )}
-      </section>
+      </Card>
 
       {/* Your Partners */}
-      <section className="bg-white rounded-lg border border-gray-200 p-6">
+      <Card className="p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Your Partners ({accepted.length})
         </h2>
         {accepted.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            No partners yet. Search for vendors to connect.
-          </p>
+          <EmptyState
+            icon={UserCheck}
+            title="No partners yet"
+            description="Search for vendors to connect."
+          />
         ) : (
           <div className="space-y-2">
             {accepted.map((conn) => (
@@ -195,21 +205,23 @@ export default function PartnerManagementPage() {
                     {conn.otherVendor?.email}
                   </p>
                 </div>
-                <button
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => handleRemove(conn.id)}
-                  className="px-3 py-1.5 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50"
                 >
+                  <UserX className="w-4 h-4 mr-1.5" />
                   Remove
-                </button>
+                </Button>
               </div>
             ))}
           </div>
         )}
-      </section>
+      </Card>
 
       {/* Pending Requests (Incoming) */}
       {incoming.length > 0 && (
-        <section className="bg-white rounded-lg border border-gray-200 p-6">
+        <Card className="p-6 border-yellow-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Pending Requests ({incoming.length})
           </h2>
@@ -228,34 +240,38 @@ export default function PartnerManagementPage() {
                     {conn.otherVendor?.email}
                   </p>
                   {conn.message && (
-                    <p className="text-xs text-gray-600 mt-1 italic">
-                      "{conn.message}"
+                    <p className="text-xs text-gray-600 mt-1 italic flex items-center gap-1">
+                      <MessageSquare className="w-3 h-3" />
+                      &ldquo;{conn.message}&rdquo;
                     </p>
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <button
+                  <Button
+                    size="sm"
                     onClick={() => handleRespond(conn.id, "accepted")}
-                    className="px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600"
                   >
+                    <Check className="w-4 h-4 mr-1.5" />
                     Accept
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => handleRespond(conn.id, "rejected")}
-                    className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
                   >
+                    <X className="w-4 h-4 mr-1.5" />
                     Reject
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
-        </section>
+        </Card>
       )}
 
       {/* Sent Requests */}
       {sent.length > 0 && (
-        <section className="bg-white rounded-lg border border-gray-200 p-6">
+        <Card className="p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Sent Requests ({sent.length})
           </h2>
@@ -273,18 +289,20 @@ export default function PartnerManagementPage() {
                   <p className="text-xs text-gray-500">
                     {conn.otherVendor?.email}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Pending</p>
+                  <Badge variant="warning">Pending</Badge>
                 </div>
-                <button
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => handleRemove(conn.id)}
-                  className="px-3 py-1.5 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50"
                 >
+                  <UserX className="w-4 h-4 mr-1.5" />
                   Cancel
-                </button>
+                </Button>
               </div>
             ))}
           </div>
-        </section>
+        </Card>
       )}
     </div>
   );

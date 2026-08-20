@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import type { VendorInquiry, VendorInquiryStats } from "@/lib/types";
 import toast from "react-hot-toast";
+import { Card, Badge, Button, EmptyState, PageHeader, Skeleton } from "@/components/ui";
+import { Mail, Eye, RefreshCw, Filter, MessageSquare, X } from "lucide-react";
 
 const STATUS_TABS = ["all", "new", "read", "replied", "archived"] as const;
 type StatusTab = (typeof STATUS_TABS)[number];
@@ -103,14 +105,22 @@ export default function MarketplaceInbox() {
 
   const totalPages = Math.ceil(total / limit);
 
+  const getBadgeVariant = (status: string) => {
+    switch (status) {
+      case "new": return "warning";
+      case "read": return "info";
+      case "replied": return "success";
+      case "archived": return "default";
+      default: return "default";
+    }
+  };
+
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Inquiries</h1>
-        <p className="text-gray-500 mt-1">
-          Leads and messages from couples browsing the marketplace
-        </p>
-      </div>
+      <PageHeader
+        title="Inquiries"
+        description="Leads and messages from couples browsing the marketplace"
+      />
 
       {/* Stats summary */}
       <div className="grid grid-cols-5 gap-4 mb-6">
@@ -145,33 +155,28 @@ export default function MarketplaceInbox() {
       {/* Inquiries table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500" />
+          <div className="p-12 space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-4 w-2/3" />
           </div>
         ) : inquiries.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No inquiries found.</p>
-          </div>
+          <EmptyState
+            icon={MessageSquare}
+            title="No inquiries found"
+            description="When couples send you inquiries, they'll appear here."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Service
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -198,19 +203,9 @@ export default function MarketplaceInbox() {
                         : "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
-                          inquiry.status === "new"
-                            ? "bg-blue-100 text-blue-700"
-                            : inquiry.status === "read"
-                              ? "bg-gray-100 text-gray-700"
-                              : inquiry.status === "replied"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
+                      <Badge variant={getBadgeVariant(inquiry.status)}>
                         {inquiry.status}
-                      </span>
+                      </Badge>
                     </td>
                   </tr>
                 ))}
@@ -261,129 +256,85 @@ export default function MarketplaceInbox() {
                   onClick={() => setSelectedInquiry(null)}
                   className="p-1 text-gray-400 hover:text-gray-600"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="mt-4 space-y-3">
                 {selectedInquiry.phone && (
                   <div>
-                    <span className="text-xs font-medium text-gray-500">
-                      Phone
-                    </span>
-                    <p className="text-sm text-gray-900">
-                      {selectedInquiry.phone}
-                    </p>
+                    <span className="text-xs font-medium text-gray-500">Phone</span>
+                    <p className="text-sm text-gray-900">{selectedInquiry.phone}</p>
                   </div>
                 )}
                 {selectedInquiry.weddingDate && (
                   <div>
-                    <span className="text-xs font-medium text-gray-500">
-                      Wedding Date
-                    </span>
-                    <p className="text-sm text-gray-900">
-                      {selectedInquiry.weddingDate}
-                    </p>
+                    <span className="text-xs font-medium text-gray-500">Wedding Date</span>
+                    <p className="text-sm text-gray-900">{selectedInquiry.weddingDate}</p>
                   </div>
                 )}
                 {selectedInquiry.venue && (
                   <div>
-                    <span className="text-xs font-medium text-gray-500">
-                      Venue
-                    </span>
-                    <p className="text-sm text-gray-900">
-                      {selectedInquiry.venue}
-                    </p>
+                    <span className="text-xs font-medium text-gray-500">Venue</span>
+                    <p className="text-sm text-gray-900">{selectedInquiry.venue}</p>
                   </div>
                 )}
                 {selectedInquiry.serviceInterest && (
                   <div>
-                    <span className="text-xs font-medium text-gray-500">
-                      Service Interest
-                    </span>
-                    <p className="text-sm text-gray-900">
-                      {selectedInquiry.serviceInterest}
-                    </p>
+                    <span className="text-xs font-medium text-gray-500">Service Interest</span>
+                    <p className="text-sm text-gray-900">{selectedInquiry.serviceInterest}</p>
                   </div>
                 )}
                 <div>
-                  <span className="text-xs font-medium text-gray-500">
-                    Message
-                  </span>
+                  <span className="text-xs font-medium text-gray-500">Message</span>
                   <p className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">
                     {selectedInquiry.message}
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-gray-500">
-                    Received
-                  </span>
+                  <span className="text-xs font-medium text-gray-500">Received</span>
                   <p className="text-sm text-gray-900">
                     {selectedInquiry.createdAt
-                      ? new Date(
-                          selectedInquiry.createdAt,
-                        ).toLocaleString()
+                      ? new Date(selectedInquiry.createdAt).toLocaleString()
                       : "—"}
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-gray-500">
-                    Current Status
-                  </span>
-                  <span
-                    className={`ml-2 inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
-                      selectedInquiry.status === "new"
-                        ? "bg-blue-100 text-blue-700"
-                        : selectedInquiry.status === "read"
-                          ? "bg-gray-100 text-gray-700"
-                          : selectedInquiry.status === "replied"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
+                  <span className="text-xs font-medium text-gray-500">Current Status</span>
+                  <Badge className="ml-2" variant={getBadgeVariant(selectedInquiry.status)}>
                     {selectedInquiry.status}
-                  </span>
+                  </Badge>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="mt-6 flex flex-wrap gap-2">
                 {selectedInquiry.status !== "replied" && (
-                  <button
-                    onClick={() =>
-                      handleUpdateStatus(selectedInquiry.id, "replied")
-                    }
-                    className="px-4 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleUpdateStatus(selectedInquiry.id, "replied")}
                   >
                     Mark as Replied
-                  </button>
+                  </Button>
                 )}
                 {selectedInquiry.status !== "archived" && (
-                  <button
-                    onClick={() =>
-                      handleUpdateStatus(selectedInquiry.id, "archived")
-                    }
-                    className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleUpdateStatus(selectedInquiry.id, "archived")}
                   >
                     Archive
-                  </button>
+                  </Button>
                 )}
                 {selectedInquiry.status === "archived" && (
-                  <button
-                    onClick={() =>
-                      handleUpdateStatus(selectedInquiry.id, "read")
-                    }
-                    className="px-4 py-2 text-sm bg-brand-100 text-brand-700 rounded-lg hover:bg-brand-200"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleUpdateStatus(selectedInquiry.id, "read")}
                   >
                     Unarchive
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

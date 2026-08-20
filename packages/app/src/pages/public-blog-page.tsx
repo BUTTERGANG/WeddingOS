@@ -3,6 +3,8 @@ import { Link, useRoute } from "wouter";
 import { api } from "@/lib/api";
 import { SEO } from "@/components/seo";
 import type { BlogPost } from "@/lib/types";
+import { Card, Badge, EmptyState, Skeleton, LoadingSpinner } from "@/components/ui";
+import { BookOpen, Calendar, Tag, ArrowLeft, ChevronLeft } from "lucide-react";
 
 // Get vendorId from URL path — for now we use a query param or a route param
 function getVendorId(): number {
@@ -51,9 +53,17 @@ function PublicBlogListPage() {
         <h1 className="text-4xl font-bold text-gray-900 mb-8">Blog</h1>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-500">Loading...</div>
+          <div className="space-y-6">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">No posts yet.</div>
+          <EmptyState
+            icon={BookOpen}
+            title="No posts yet"
+            description="Check back soon for new content."
+          />
         ) : (
           <div className="space-y-12">
             {posts.map((post) => (
@@ -61,12 +71,11 @@ function PublicBlogListPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-sm text-gray-500">
                     {post.category && (
-                      <span className="text-brand-600 font-medium">
-                        {post.category.name}
-                      </span>
+                      <Badge variant="info">{post.category.name}</Badge>
                     )}
                     {post.publishedAt && (
-                      <time>
+                      <time className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
                         {new Date(post.publishedAt).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "long",
@@ -132,7 +141,7 @@ function PublicBlogPostPage({ slug }: { slug: string }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -142,8 +151,8 @@ function PublicBlogPostPage({ slug }: { slug: string }) {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Post not found</h1>
-          <Link href="/blog" className="text-brand-600 hover:text-brand-700">
-            ← Back to blog
+          <Link href="/blog" className="text-brand-600 hover:text-brand-700 flex items-center gap-1">
+            <ArrowLeft className="w-4 h-4" /> Back to blog
           </Link>
         </div>
       </div>
@@ -154,17 +163,18 @@ function PublicBlogPostPage({ slug }: { slug: string }) {
     <div className="min-h-screen bg-white">
       <SEO title={post.seoTitle || post.title} description={post.seoDescription || post.excerpt || undefined} />
       <article className="max-w-3xl mx-auto px-4 py-16">
-        <Link href="/blog" className="text-sm text-brand-600 hover:text-brand-700 mb-8 inline-block">
-          ← Back to blog
+        <Link href="/blog" className="text-sm text-brand-600 hover:text-brand-700 mb-8 inline-block flex items-center gap-1">
+          <ArrowLeft className="w-4 h-4" /> Back to blog
         </Link>
 
         <header className="mb-8">
           <div className="flex items-center gap-3 text-sm text-gray-500 mb-4">
             {post.category && (
-              <span className="text-brand-600 font-medium">{post.category?.name}</span>
+              <Badge variant="info">{post.category?.name}</Badge>
             )}
             {post.publishedAt && (
-              <time>
+              <time className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" />
                 {new Date(post.publishedAt).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
@@ -200,9 +210,9 @@ function PublicBlogPostPage({ slug }: { slug: string }) {
             {post.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm"
+                className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm flex items-center gap-1"
               >
-                {tag}
+                <Tag className="w-3 h-3" /> {tag}
               </span>
             ))}
           </div>
@@ -213,9 +223,9 @@ function PublicBlogPostPage({ slug }: { slug: string }) {
           {prevPost ? (
             <Link
               href={`/blog/${prevPost.slug}`}
-              className="text-brand-600 hover:text-brand-700"
+              className="text-brand-600 hover:text-brand-700 flex items-center gap-1"
             >
-              ← {prevPost.title}
+              <ChevronLeft className="w-4 h-4" /> {prevPost.title}
             </Link>
           ) : (
             <div />

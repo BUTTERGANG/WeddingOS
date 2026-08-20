@@ -2,6 +2,8 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useParams } from "wouter";
 import { format, parseISO } from "date-fns";
 import type { CalendarSlot } from "@/lib/types";
+import { ChevronLeft, Calendar } from "lucide-react";
+import { Button, Card } from "@/components/ui";
 
 const API_BASE = "";
 
@@ -210,24 +212,12 @@ export default function PublicBookingPage() {
   if (selectedSlot) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8">
+        <Card className="max-w-md w-full p-8">
           <button
             onClick={handleBackToSlots}
             className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <ChevronLeft className="w-4 h-4" />
             Back to available slots
           </button>
 
@@ -311,15 +301,16 @@ export default function PublicBookingPage() {
               />
             </div>
 
-            <button
+            <Button
               type="submit"
+              loading={submitting}
               disabled={submitting}
-              className="w-full py-2.5 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full"
             >
               {submitting ? "Booking..." : "Confirm Booking"}
-            </button>
+            </Button>
           </form>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -367,19 +358,7 @@ export default function PublicBookingPage() {
         {/* Empty state */}
         {!loading && !error && slots.length === 0 && (
           <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-            <svg
-              className="w-12 h-12 text-gray-300 mx-auto mb-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
+            <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 font-medium">
               No available slots found
             </p>

@@ -3,6 +3,8 @@ import { Link, useParams } from "wouter";
 import toast from "react-hot-toast";
 import { api } from "@/lib/api";
 import type { Client } from "@/lib/types";
+import { DollarSign, X } from "lucide-react";
+import { Button, Card } from "@/components/ui";
 
 interface PricingService {
   id: string | number;
@@ -569,17 +571,19 @@ export default function PricingPage() {
               />
             </div>
 
-            <button
+            <Button
               type="submit"
+              loading={submitting}
               disabled={
                 submitting ||
                 !state ||
                 selectedServiceTypes.length === 0
               }
-              className="w-full py-2.5 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full"
             >
+              <DollarSign className="w-4 h-4 mr-1.5" />
               {submitting ? "Calculating..." : "Get Pricing Recommendation"}
-            </button>
+            </Button>
           </form>
 
           {/* Results */}
@@ -592,26 +596,14 @@ export default function PricingPage() {
 
             {!recommendation ? (
               <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col items-center justify-center text-center py-16">
-                <svg
-                  className="w-12 h-12 text-gray-300 mb-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <DollarSign className="w-12 h-12 text-gray-300 mb-3" />
                 <p className="text-gray-500 text-sm">
                   Fill out the quote details and get an AI-powered pricing
                   recommendation.
                 </p>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+              <Card className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="font-semibold text-gray-900">
                     Recommended Quote
@@ -712,14 +704,14 @@ export default function PricingPage() {
                   </div>
                 )}
 
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowInvoiceModal(true)}
-                  className="w-full py-2.5 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition-colors"
+                  className="w-full"
                 >
                   Create Invoice from Quote
-                </button>
-              </div>
+                </Button>
+              </Card>
             )}
           </div>
         </div>
@@ -737,19 +729,7 @@ export default function PricingPage() {
                 onClick={() => setShowInvoiceModal(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleCreateInvoice} className="p-6 space-y-4">
@@ -786,17 +766,18 @@ export default function PricingPage() {
                 >
                   Cancel
                 </button>
-                <button
+                <Button
                   type="submit"
+                  loading={invoiceCreating}
                   disabled={invoiceCreating}
-                  className="flex-1 py-2.5 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 disabled:opacity-50 transition-colors"
+                  className="flex-1"
                 >
                   {invoiceCreating
                     ? "Creating..."
                     : `Create Invoice (${formatCurrency(
                         recommendation.totalCents
                       )})`}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import type { SharedClient, Client, PartnerConnection } from "@/lib/types";
 import toast from "react-hot-toast";
+import { Card, Badge, Button, EmptyState, PageHeader } from "@/components/ui";
+import { Users, Share2, Eye, Lock, Check, X, UserPlus } from "lucide-react";
 
 interface SharedClientIncoming extends SharedClient {
   ownerVendor: {
@@ -140,6 +142,15 @@ export default function SharedClientsPage() {
     }
   };
 
+  const permissionBadgeVariant = (perm: string) => {
+    switch (perm) {
+      case "read": return "info";
+      case "write": return "warning";
+      case "admin": return "purple";
+      default: return "default";
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -150,19 +161,20 @@ export default function SharedClientsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Shared Clients</h1>
-        <button
-          onClick={() => setShowShareForm(!showShareForm)}
-          className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600"
-        >
-          {showShareForm ? "Cancel" : "Share a Client"}
-        </button>
-      </div>
+      <PageHeader
+        title="Shared Clients"
+        actions={
+          <Button
+            onClick={() => setShowShareForm(!showShareForm)}
+          >
+            {showShareForm ? "Cancel" : "Share a Client"}
+          </Button>
+        }
+      />
 
       {/* Share Form */}
       {showShareForm && (
-        <section className="bg-white rounded-lg border border-gray-200 p-6">
+        <Card className="p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Share a Client with a Partner
           </h2>
@@ -179,7 +191,7 @@ export default function SharedClientsPage() {
                 <option value="">Select a client...</option>
                 {myClients.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name} — {c.email}
+                    {c.name} &mdash; {c.email}
                   </option>
                 ))}
               </select>
@@ -215,28 +227,31 @@ export default function SharedClientsPage() {
                 <option value="admin">Admin (full access)</option>
               </select>
             </div>
-            <button
+            <Button
               onClick={handleShare}
               disabled={
                 sharing || !selectedClientId || !selectedPartnerId
               }
-              className="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 disabled:opacity-50"
+              loading={sharing}
             >
+              <Share2 className="w-4 h-4 mr-2" />
               {sharing ? "Sharing..." : "Share Client"}
-            </button>
+            </Button>
           </div>
-        </section>
+        </Card>
       )}
 
       {/* Shared with me (incoming) */}
-      <section className="bg-white rounded-lg border border-gray-200 p-6">
+      <Card className="p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Shared with Me ({sharedData?.incoming.length ?? 0})
         </h2>
         {!sharedData?.incoming.length ? (
-          <p className="text-sm text-gray-500">
-            No clients have been shared with you yet.
-          </p>
+          <EmptyState
+            icon={Eye}
+            title="No shared clients"
+            description="No clients have been shared with you yet."
+          />
         ) : (
           <div className="space-y-2">
             {sharedData.incoming.map((sc) => (
@@ -252,33 +267,30 @@ export default function SharedClientsPage() {
                     Shared by:{" "}
                     {sc.ownerVendor?.businessName || sc.ownerVendor?.name}
                   </p>
-                  <span
-                    className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full ${
-                      sc.permission === "read"
-                        ? "bg-blue-100 text-blue-700"
-                        : sc.permission === "write"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
-                    }`}
+                  <Badge
+                    variant={permissionBadgeVariant(sc.permission)}
+                    className="mt-1"
                   >
                     {sc.permission}
-                  </span>
+                  </Badge>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </section>
+      </Card>
 
       {/* My shared clients (outgoing) */}
-      <section className="bg-white rounded-lg border border-gray-200 p-6">
+      <Card className="p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           My Shared Clients ({sharedData?.outgoing.length ?? 0})
         </h2>
         {!sharedData?.outgoing.length ? (
-          <p className="text-sm text-gray-500">
-            You haven't shared any clients yet.
-          </p>
+          <EmptyState
+            icon={Share2}
+            title="No shared clients"
+            description="You haven't shared any clients yet."
+          />
         ) : (
           <div className="space-y-2">
             {sharedData.outgoing.map((sc) => (
@@ -296,17 +308,11 @@ export default function SharedClientsPage() {
                       sc.partnerVendor?.name}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${
-                        sc.permission === "read"
-                          ? "bg-blue-100 text-blue-700"
-                          : sc.permission === "write"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
-                      }`}
+                    <Badge
+                      variant={permissionBadgeVariant(sc.permission)}
                     >
                       {sc.permission}
-                    </span>
+                    </Badge>
                     <select
                       value={sc.permission}
                       onChange={(e) =>
@@ -320,17 +326,19 @@ export default function SharedClientsPage() {
                     </select>
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => handleRevoke(sc.id)}
-                  className="px-3 py-1.5 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50"
                 >
+                  <Lock className="w-4 h-4 mr-1.5" />
                   Revoke
-                </button>
+                </Button>
               </div>
             ))}
           </div>
         )}
-      </section>
+      </Card>
     </div>
   );
 }

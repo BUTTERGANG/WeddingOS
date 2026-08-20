@@ -3,6 +3,8 @@ import { Link } from "wouter";
 import toast from "react-hot-toast";
 import { api } from "@/lib/api";
 import type { Client } from "@/lib/types";
+import { Card, Badge, EmptyState, Skeleton, Button, Input, Select } from "@/components/ui";
+import { X, Plus, Search, Users } from "lucide-react";
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -10,7 +12,6 @@ export default function ClientsPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Add form state
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
@@ -76,13 +77,10 @@ export default function ClientsPage() {
     setFormNotes("");
   };
 
-  const statusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      active: "bg-green-100 text-green-700",
-      lead: "bg-yellow-100 text-yellow-700",
-      archived: "bg-gray-100 text-gray-600",
-    };
-    return styles[status] || "bg-gray-100 text-gray-600";
+  const statusVariant = (status: string) => {
+    if (status === "active") return "success";
+    if (status === "lead") return "warning";
+    return "default";
   };
 
   return (
@@ -94,29 +92,15 @@ export default function ClientsPage() {
             {clients.length} client{clients.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition-colors"
-        >
+        <Button onClick={() => setShowAdd(true)}>
+          <Plus className="w-4 h-4 mr-1.5" />
           Add Client
-        </button>
+        </Button>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
           value={search}
@@ -128,13 +112,33 @@ export default function ClientsPage() {
 
       {/* Client list */}
       {loading ? (
-        <div className="text-center py-12 text-gray-400">Loading...</div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-400">
-            {search ? "No clients match your search" : "No clients yet. Add your first client!"}
-          </p>
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Card key={i}>
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="w-48 h-5" />
+                  <Skeleton className="w-32 h-4" />
+                </div>
+                <Skeleton className="w-20 h-6 rounded-full" />
+              </div>
+            </Card>
+          ))}
         </div>
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title={search ? "No matches" : "No clients yet"}
+          description={search ? "No clients match your search" : "Add your first client to get started"}
+          action={
+            !search ? (
+              <Button onClick={() => setShowAdd(true)}>
+                <Plus className="w-4 h-4 mr-1.5" />
+                Add Client
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid gap-4">
           {filtered.map((client) => (
@@ -165,11 +169,9 @@ export default function ClientsPage() {
                     )}
                   </div>
                 </div>
-                <span
-                  className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${statusBadge(client.status)}`}
-                >
+                <Badge variant={statusVariant(client.status)}>
                   {client.status}
-                </span>
+                </Badge>
               </div>
             </Link>
           ))}
@@ -186,44 +188,35 @@ export default function ClientsPage() {
                 onClick={() => setShowAdd(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleAdd} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                  <input required value={formName} onChange={(e) => setFormName(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                  <Input required value={formName} onChange={(e) => setFormName(e.target.value)} label="Name *" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                  <input type="email" required value={formEmail} onChange={(e) => setFormEmail(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                  <Input type="email" required value={formEmail} onChange={(e) => setFormEmail(e.target.value)} label="Email *" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                  <input value={formPhone} onChange={(e) => setFormPhone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                  <Input value={formPhone} onChange={(e) => setFormPhone(e.target.value)} label="Phone" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Partner Name</label>
-                  <input value={formPartner} onChange={(e) => setFormPartner(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                  <Input value={formPartner} onChange={(e) => setFormPartner(e.target.value)} label="Partner Name" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Wedding Date</label>
-                  <input type="date" value={formWeddingDate} onChange={(e) => setFormWeddingDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                  <Input type="date" value={formWeddingDate} onChange={(e) => setFormWeddingDate(e.target.value)} label="Wedding Date" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
-                  <input value={formVenue} onChange={(e) => setFormVenue(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                  <Input value={formVenue} onChange={(e) => setFormVenue(e.target.value)} label="Venue" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select value={formStatus} onChange={(e) => setFormStatus(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                  <Select value={formStatus} onChange={(e) => setFormStatus(e.target.value)} label="Status">
                     <option value="lead">Lead</option>
                     <option value="active">Active</option>
                     <option value="archived">Archived</option>
-                  </select>
+                  </Select>
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
@@ -231,10 +224,8 @@ export default function ClientsPage() {
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowAdd(false)} className="flex-1 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-                <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 disabled:opacity-50 transition-colors">
-                  {saving ? "Saving..." : "Add Client"}
-                </button>
+                <Button type="button" variant="secondary" onClick={() => setShowAdd(false)} className="flex-1">Cancel</Button>
+                <Button type="submit" loading={saving} className="flex-1">Add Client</Button>
               </div>
             </form>
           </div>

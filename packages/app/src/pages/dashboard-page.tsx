@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import type { Client, TimelineEvent } from "@/lib/types";
+import { Card, Badge, Skeleton } from "@/components/ui";
 
 interface DashboardStats {
   totalClients: number;
@@ -37,12 +38,10 @@ export default function DashboardPage() {
       }));
     }).catch(() => {});
 
-    // Get upcoming timeline events across all clients
     api<TimelineEvent[]>("/timeline/upcoming").then((events) => {
       setUpcomingEvents(events.slice(0, 7));
     }).catch(() => {});
 
-    // Get unpaid invoice count
     api<any[]>("/invoices/unpaid").then((invoices) => {
       setStats((prev) => ({ ...prev, unpaidInvoices: invoices.length }));
     }).catch(() => {});
@@ -57,6 +56,12 @@ export default function DashboardPage() {
     { label: "Unpaid Invoices", value: stats.unpaidInvoices, color: "bg-orange-500" },
   ];
 
+  const statusVariant = (status: string) => {
+    if (status === "active") return "success";
+    if (status === "lead") return "warning";
+    return "default";
+  };
+
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
@@ -69,19 +74,19 @@ export default function DashboardPage() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
-          <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-5">
+          <Card key={card.label}>
             <div className="flex items-center gap-3">
               <div className={`w-3 h-3 rounded-full ${card.color}`} />
               <span className="text-sm text-gray-500">{card.label}</span>
             </div>
             <p className="mt-2 text-3xl font-bold text-gray-900">{card.value}</p>
-          </div>
+          </Card>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent clients */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Recent Clients</h2>
             <Link
@@ -109,25 +114,17 @@ export default function DashboardPage() {
                         : "No date set"}
                     </p>
                   </div>
-                  <span
-                    className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      client.status === "active"
-                        ? "bg-green-100 text-green-700"
-                        : client.status === "lead"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
+                  <Badge variant={statusVariant(client.status)}>
                     {client.status}
-                  </span>
+                  </Badge>
                 </Link>
               ))}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Upcoming events / mini calendar */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <Card>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             This Week
           </h2>
@@ -190,7 +187,7 @@ export default function DashboardPage() {
               ))
             )}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

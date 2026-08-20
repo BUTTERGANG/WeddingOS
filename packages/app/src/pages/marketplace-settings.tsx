@@ -2,6 +2,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import toast from "react-hot-toast";
 import { api } from "@/lib/api";
 import type { VendorMarketplaceProfile } from "@/lib/types";
+import { Card, Button, Input, PageHeader, Skeleton } from "@/components/ui";
 
 const SERVICE_CATEGORIES = [
   "Photography",
@@ -98,32 +99,28 @@ export default function MarketplaceSettings() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-500" />
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-48 w-full" />
       </div>
     );
   }
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Marketplace Settings
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Manage your vendor marketplace presence and visibility
-        </p>
-      </div>
+      <PageHeader
+        title="Marketplace Settings"
+        description="Manage your vendor marketplace presence and visibility"
+      />
 
       <form onSubmit={handleSave} className="max-w-2xl space-y-6">
         {/* Visibility Toggle */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Marketplace Visibility
-          </h2>
+        <Card>
+          <h2 className="text-lg font-semibold text-gray-900">Marketplace Visibility</h2>
           <p className="text-sm text-gray-500 mt-1">
-            When enabled, your business will appear in the public marketplace
-            directory
+            When enabled, your business will appear in the public marketplace directory
           </p>
           <label className="mt-4 flex items-center gap-3 cursor-pointer">
             <div className="relative">
@@ -151,18 +148,14 @@ export default function MarketplaceSettings() {
                 : "Hidden from marketplace"}
             </span>
           </label>
-        </div>
+        </Card>
 
         {/* Profile Info */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Profile Information
-          </h2>
+        <Card>
+          <h2 className="text-lg font-semibold text-gray-900">Profile Information</h2>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Description
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Description</label>
               <textarea
                 rows={5}
                 value={description}
@@ -172,61 +165,44 @@ export default function MarketplaceSettings() {
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="e.g. Portland"
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  State
-                </label>
-                <input
-                  type="text"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="e.g. OR"
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Profile Image URL
-              </label>
-              <input
-                type="url"
-                value={profileImage}
-                onChange={(e) => setProfileImage(e.target.value)}
-                placeholder="https://example.com/my-photo.jpg"
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              <Input
+                label="City"
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="e.g. Portland"
               />
-              {profileImage && (
-                <img
-                  src={profileImage}
-                  alt="Preview"
-                  className="mt-2 w-24 h-24 rounded-lg object-cover border border-gray-200"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                />
-              )}
+              <Input
+                label="State"
+                type="text"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                placeholder="e.g. OR"
+              />
             </div>
+            <Input
+              label="Profile Image URL"
+              type="url"
+              value={profileImage}
+              onChange={(e) => setProfileImage(e.target.value)}
+              placeholder="https://example.com/my-photo.jpg"
+            />
+            {profileImage && (
+              <img
+                src={profileImage}
+                alt="Preview"
+                className="mt-2 w-24 h-24 rounded-lg object-cover border border-gray-200"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+            )}
           </div>
-        </div>
+        </Card>
 
         {/* Service Categories */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Service Categories
-          </h2>
+        <Card>
+          <h2 className="text-lg font-semibold text-gray-900">Service Categories</h2>
           <p className="text-sm text-gray-500 mt-1">
             Select the services you offer (click to toggle)
           </p>
@@ -246,17 +222,18 @@ export default function MarketplaceSettings() {
               </button>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Save */}
         <div className="flex justify-end">
-          <button
+          <Button
             type="submit"
+            variant="primary"
             disabled={saving}
-            className="px-6 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 font-medium disabled:opacity-50"
+            loading={saving}
           >
-            {saving ? "Saving..." : "Save Settings"}
-          </button>
+            Save Settings
+          </Button>
         </div>
       </form>
     </div>

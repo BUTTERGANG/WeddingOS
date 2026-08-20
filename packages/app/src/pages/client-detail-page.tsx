@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import toast from "react-hot-toast";
 import { api } from "@/lib/api";
 import type { Client, Invoice, Contract } from "@/lib/types";
+import { Card, Badge, Button } from "@/components/ui";
 
 interface ClientDetailPageProps {
   clientId: string;
@@ -71,10 +72,16 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
   const totalInvoiceAmount = invoices.reduce((sum, i) => sum + i.amountCents, 0);
   const signedContracts = contracts.filter((c) => c.status === "signed").length;
 
+  const statusVariant = (status: string) => {
+    if (status === "active") return "success";
+    if (status === "lead") return "warning";
+    return "default";
+  };
+
   return (
     <div className="space-y-6 max-w-5xl">
       {/* Header */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <Card>
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -93,17 +100,9 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
               </p>
             )}
           </div>
-          <span
-            className={`text-xs font-medium px-3 py-1 rounded-full capitalize ${
-              client.status === "active"
-                ? "bg-green-100 text-green-700"
-                : client.status === "lead"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-gray-100 text-gray-600"
-            }`}
-          >
+          <Badge variant={statusVariant(client.status)}>
             {client.status}
-          </span>
+          </Badge>
         </div>
 
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -134,30 +133,30 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
             </div>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+        <Card className="text-center">
           <p className="text-2xl font-bold text-gray-900">{invoices.length}</p>
           <p className="text-sm text-gray-500">
             {paidInvoices === invoices.length && invoices.length > 0
               ? "All Paid"
               : `${paidInvoices}/${invoices.length} Paid`}
           </p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+        </Card>
+        <Card className="text-center">
           <p className="text-2xl font-bold text-gray-900">
             ${(totalInvoiceAmount / 100).toLocaleString()}
           </p>
           <p className="text-sm text-gray-500">Total Invoiced</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+        </Card>
+        <Card className="text-center">
           <p className="text-2xl font-bold text-gray-900">
             {signedContracts}/{contracts.length}
           </p>
           <p className="text-sm text-gray-500">Contracts Signed</p>
-        </div>
+        </Card>
       </div>
 
       {/* Tab navigation */}
@@ -184,11 +183,8 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
         {activeTab === "timeline" && (
           <div className="text-center py-12">
             <p className="text-gray-400 mb-4">Manage this client's wedding timeline</p>
-            <Link
-              href={`/clients/${client.id}/timeline`}
-              className="inline-block px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600"
-            >
-              View Timeline
+            <Link href={`/clients/${client.id}/timeline`}>
+              <Button>View Timeline</Button>
             </Link>
           </div>
         )}
@@ -196,11 +192,8 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
         {activeTab === "gallery" && (
           <div className="text-center py-12">
             <p className="text-gray-400 mb-4">Manage galleries and photos</p>
-            <Link
-              href={`/clients/${client.id}/gallery`}
-              className="inline-block px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600"
-            >
-              View Gallery
+            <Link href={`/clients/${client.id}/gallery`}>
+              <Button>View Gallery</Button>
             </Link>
           </div>
         )}
@@ -212,11 +205,8 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
                 ? `${invoices.length} invoice(s) created`
                 : "No invoices yet"}
             </p>
-            <Link
-              href={`/clients/${client.id}/invoices`}
-              className="inline-block px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600"
-            >
-              View Invoices
+            <Link href={`/clients/${client.id}/invoices`}>
+              <Button>View Invoices</Button>
             </Link>
           </div>
         )}
@@ -228,11 +218,8 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
                 ? `${contracts.length} contract(s)`
                 : "No contracts yet"}
             </p>
-            <Link
-              href={`/clients/${client.id}/contracts`}
-              className="inline-block px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600"
-            >
-              View Contracts
+            <Link href={`/clients/${client.id}/contracts`}>
+              <Button>View Contracts</Button>
             </Link>
           </div>
         )}
@@ -242,11 +229,8 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
             <p className="text-gray-400 mb-4">
               Get AI-powered pricing recommendations for this client
             </p>
-            <Link
-              href={`/clients/${client.id}/pricing`}
-              className="inline-block px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600"
-            >
-              View Pricing
+            <Link href={`/clients/${client.id}/pricing`}>
+              <Button>View Pricing</Button>
             </Link>
           </div>
         )}

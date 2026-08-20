@@ -3,6 +3,7 @@ import { useLocation, useRoute } from "wouter";
 import { api } from "@/lib/api";
 import type { BlogPost, BlogCategory } from "@/lib/types";
 import toast from "react-hot-toast";
+import { Button, Input, Select, PageHeader, Skeleton } from "@/components/ui";
 
 export default function BlogEditorPage() {
   const [, setLocation] = useLocation();
@@ -113,50 +114,47 @@ export default function BlogEditorPage() {
   };
 
   if (loading) {
-    return <div className="p-12 text-center text-gray-500">Loading...</div>;
+    return (
+      <div className="max-w-4xl mx-auto p-12">
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {isNew ? "New Post" : "Edit Post"}
-        </h1>
-        <div className="flex gap-2">
-          {!isNew && (
-            <button
-              onClick={handleDelete}
-              className="px-4 py-2 text-red-600 border border-red-200 rounded-lg hover:bg-red-50 text-sm font-medium"
-            >
-              Delete
-            </button>
-          )}
-          <button
-            onClick={() => setLocation("/blog")}
-            className="px-4 py-2 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 text-sm font-medium"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={isNew ? "New Post" : "Edit Post"}
+        actions={
+          <div className="flex gap-2">
+            {!isNew && (
+              <Button variant="danger" size="sm" onClick={handleDelete}>
+                Delete
+              </Button>
+            )}
+            <Button variant="secondary" size="sm" onClick={() => setLocation("/blog")}>
+              Cancel
+            </Button>
+          </div>
+        }
+      />
 
       <div className="space-y-6">
         {/* Main editor */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-medium text-gray-900">Content</h2>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              placeholder="Post title"
-            />
-          </div>
+          <Input
+            label="Title *"
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Post title"
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -184,18 +182,13 @@ export default function BlogEditorPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Featured Image URL
-            </label>
-            <input
-              type="text"
-              value={featuredImage}
-              onChange={(e) => setFeaturedImage(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
+          <Input
+            label="Featured Image URL"
+            type="text"
+            value={featuredImage}
+            onChange={(e) => setFeaturedImage(e.target.value)}
+            placeholder="https://example.com/image.jpg"
+          />
         </div>
 
         {/* Meta section */}
@@ -203,67 +196,47 @@ export default function BlogEditorPage() {
           <h2 className="text-lg font-medium text-gray-900">Post Settings</h2>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="scheduled">Scheduled</option>
-              </select>
-            </div>
+            <Select
+              label="Status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="scheduled">Scheduled</option>
+            </Select>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <select
-                value={categoryId}
-                onChange={(e) =>
-                  setCategoryId(e.target.value ? Number(e.target.value) : "")
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              >
-                <option value="">No category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Category"
+              value={categoryId}
+              onChange={(e) =>
+                setCategoryId(e.target.value ? Number(e.target.value) : "")
+              }
+            >
+              <option value="">No category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </Select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tags (comma separated)
-            </label>
-            <input
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              placeholder="wedding, photography, planning"
-            />
-          </div>
+          <Input
+            label="Tags (comma separated)"
+            type="text"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="wedding, photography, planning"
+          />
 
           {status === "scheduled" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Publish Date
-              </label>
-              <input
-                type="datetime-local"
-                value={publishedAt}
-                onChange={(e) => setPublishedAt(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              />
-            </div>
+            <Input
+              label="Publish Date"
+              type="datetime-local"
+              value={publishedAt}
+              onChange={(e) => setPublishedAt(e.target.value)}
+            />
           )}
         </div>
 
@@ -271,21 +244,16 @@ export default function BlogEditorPage() {
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-medium text-gray-900">SEO</h2>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              SEO Title
-            </label>
-            <input
-              type="text"
-              value={seoTitle}
-              onChange={(e) => setSeoTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              placeholder="Custom title for search engines"
-            />
-            <p className="mt-1 text-xs text-gray-400">
-              Leave empty to use the post title
-            </p>
-          </div>
+          <Input
+            label="SEO Title"
+            type="text"
+            value={seoTitle}
+            onChange={(e) => setSeoTitle(e.target.value)}
+            placeholder="Custom title for search engines"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Leave empty to use the post title
+          </p>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -306,13 +274,14 @@ export default function BlogEditorPage() {
 
         {/* Save button */}
         <div className="flex justify-end">
-          <button
+          <Button
+            variant="primary"
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2.5 bg-brand-500 text-white rounded-lg hover:bg-brand-600 disabled:opacity-50 text-sm font-medium"
+            loading={saving}
           >
-            {saving ? "Saving..." : isNew ? "Create Post" : "Save Changes"}
-          </button>
+            {isNew ? "Create Post" : "Save Changes"}
+          </Button>
         </div>
       </div>
     </div>

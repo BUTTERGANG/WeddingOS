@@ -36,8 +36,9 @@
 
 ---
 
-## Blocked
+## Phase 3 Backlog (Next)
 
-| Task | Blocked Since | Reason |
-|------|---------------|--------|
-| —    | —             | —      |
+| Task File | Priority | Estimate | Status |
+|-----------|----------|----------|--------|
+| phase_3_ai_pricing.md | P1 | 1 week | ✅ DONE |
+| — | — | — | |

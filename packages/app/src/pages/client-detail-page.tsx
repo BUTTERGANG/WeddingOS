@@ -13,6 +13,7 @@ const tabs = [
   { id: "gallery", label: "Gallery" },
   { id: "invoices", label: "Invoices" },
   { id: "contracts", label: "Contracts" },
+  { id: "pricing", label: "Pricing" },
 ];
 
 export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
@@ -232,6 +233,20 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
               className="inline-block px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600"
             >
               View Contracts
+            </Link>
+          </div>
+        )}
+
+        {activeTab === "pricing" && (
+          <div className="text-center py-12">
+            <p className="text-gray-400 mb-4">
+              Get AI-powered pricing recommendations for this client
+            </p>
+            <Link
+              href={`/clients/${client.id}/pricing`}
+              className="inline-block px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600"
+            >
+              View Pricing
             </Link>
           </div>
         )}

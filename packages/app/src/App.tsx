@@ -10,6 +10,7 @@ import TimelinePage from "@/pages/timeline-page";
 import GalleryPage from "@/pages/gallery-page";
 import InvoicesPage from "@/pages/invoices-page";
 import ContractsPage from "@/pages/contracts-page";
+import PricingPage from "@/pages/pricing-page";
 import SettingsPage from "@/pages/settings-page";
 import CalendarPage from "@/pages/calendar-page";
 import PublicBookingPage from "@/pages/public-booking-page";
@@ -129,6 +130,13 @@ function AppRoutes() {
         {(params) => (
           <ProtectedRoute>
             <ContractsPage clientId={params.id} />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/clients/:id/pricing">
+        {(params) => (
+          <ProtectedRoute>
+            <PricingPage />
           </ProtectedRoute>
         )}
       </Route>

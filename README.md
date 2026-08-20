@@ -56,8 +56,8 @@ Single-tenant, single vendor manages their studio through WeddingOS.
 - [ ] Blog/SEO website pages
 
 ### Phase 3 — Moats (Weeks 13-16)
+- [x] AI pricing recommendations
 - [ ] Multi-tenant architecture
-- [ ] AI pricing recommendations
 - [ ] Multi-vendor workflows
 - [ ] Vendor finder/marketplace
 

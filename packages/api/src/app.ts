@@ -46,11 +46,21 @@ app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 // Cookie parser
 app.use(cookieParser());
 
-// CORS — only in development, allow the Vite dev server
+// CORS — allow Vite dev server and Replit domains
 if (process.env.NODE_ENV !== "production") {
+  const corsOrigins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    /\.replit\.dev$/,
+    /\.replit\.app$/,
+    /\.user\.repl\.co$/,
+  ];
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    corsOrigins.push(`https://${process.env.REPLIT_DEV_DOMAIN}`);
+  }
   app.use(
     cors({
-      origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+      origin: corsOrigins,
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],

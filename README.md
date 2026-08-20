@@ -75,6 +75,8 @@ Consistent design system with reusable components built on Tailwind CSS and luci
 
 ## Getting Started
 
+### Local Development
+
 ```bash
 # Install dependencies
 pnpm install
@@ -91,6 +93,15 @@ cd packages/app && pnpm dev
 # Run smoke tests (needs API running)
 SMOKE_API=http://localhost:5000 npx tsx packages/api/scripts/smoke.ts
 ```
+
+### Replit
+
+1. **Fork/import** this repo into Replit
+2. **Set Secrets** (Tools > Secrets): `APP_DATABASE_URL`, `AGENTMAIL_API_KEY`, `STRIPE_SECRET_KEY`
+3. **Run** — the `.replit` config handles `pnpm dev` automatically
+4. **Deploy** — Replit uses the `[deployment]` section: `pnpm build && pnpm start`
+
+The API runs on port 5000. Vite proxies `/api` requests to it.
 
 ## Reference
 

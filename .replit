@@ -1,0 +1,19 @@
+run = "pnpm dev"
+
+# Production deployment — build frontend, then serve via API
+[deployment]
+run = ["sh", "-c", "pnpm build && pnpm start"]
+
+# Expose API port
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+# Node.js 22 via Nix
+[nix]
+channel = "stable-24_05"
+
+# Language detection
+[languages]
+[language.nodejs]
+pattern = "**/*.{js,ts,jsx,tsx}"

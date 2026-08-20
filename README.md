@@ -96,12 +96,19 @@ SMOKE_API=http://localhost:5000 npx tsx packages/api/scripts/smoke.ts
 
 ### Replit
 
+**Preview requires port 5000.** The `.replit` config maps local port 5000 to the web preview.
+
 1. **Fork/import** this repo into Replit
 2. **Set Secrets** (Tools > Secrets): `APP_DATABASE_URL`, `AGENTMAIL_API_KEY`, `STRIPE_SECRET_KEY`
-3. **Run** — the `.replit` config handles `pnpm dev` automatically
-4. **Deploy** — Replit uses the `[deployment]` section: `pnpm build && pnpm start`
+3. **Run** — the `.replit` config handles `pnpm dev` automatically (workflow waits for port 5000)
+4. **Deploy** — uses `pnpm build && pnpm start` for autoscale deployment
 
-The API runs on port 5000. Vite proxies `/api` requests to it.
+> **⚠️ Replit-origin lockfiles:** If importing a Replit-forked repo that has `package-firewall.replit.local` URLs in `pnpm-lock.yaml`, rewrite them first:
+> ```
+> sed -i 's|package-firewall.replit.local|registry.npmjs.org|g' pnpm-lock.yaml
+> ```
+
+The API runs on port 5000. Vite proxies `/api` and `/stripe` requests to it. CORS allows `.replit.dev` and `.repl.co` origins in development.
 
 ## Reference
 

@@ -48,19 +48,33 @@ app.use(cookieParser());
 
 // CORS — allow Vite dev server and Replit domains
 if (process.env.NODE_ENV !== "production") {
-  const corsOrigins = [
+  const allowedOrigins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    /\.replit\.dev$/,
-    /\.replit\.app$/,
-    /\.user\.repl\.co$/,
+    // Allow Replit preview domains
+    ...(process.env.REPL_ID && process.env.REPL_SLUG && process.env.REPL_OWNER
+      ? [`https://${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`]
+      : []),
   ];
-  if (process.env.REPLIT_DEV_DOMAIN) {
-    corsOrigins.push(`https://${process.env.REPLIT_DEV_DOMAIN}`);
-  }
+
+  // Also allow any .replit.dev or .repl.co origin (Replit previews)
+  // endsWith, not includes: prevent CORS bypass via substring match
+  const isReplitDomain = (origin: string) =>
+    origin &&
+    (origin.endsWith(".replit.dev") || origin.endsWith(".repl.co"));
+
   app.use(
     cors({
-      origin: corsOrigins,
+      origin: (origin, callback) => {
+        // Allow requests with no origin (server-to-server, curl, etc.)
+        if (!origin) return callback(null, true);
+        // Check allowed list
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        // Check Replit domains
+        if (isReplitDomain(origin)) return callback(null, true);
+        // Deny everything else
+        callback(new Error("Not allowed by CORS"));
+      },
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],

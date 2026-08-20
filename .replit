@@ -1,19 +1,39 @@
+modules = ["nodejs-22", "web"]
 run = "pnpm dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
-# Production deployment — build frontend, then serve via API
+[nix]
+channel = "stable-24_05"
+
 [deployment]
-run = ["sh", "-c", "pnpm build && pnpm start"]
+deploymentTarget = "autoscale"
+build = ["pnpm", "run", "build"]
+run = ["pnpm", "run", "start"]
 
-# Expose API port
 [[ports]]
 localPort = 5000
 externalPort = 80
 
-# Node.js 22 via Nix
-[nix]
-channel = "stable-24_05"
+[workflows]
+runButton = "Project"
 
-# Language detection
-[languages]
-[language.nodejs]
-pattern = "**/*.{js,ts,jsx,tsx}"
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm dev"
+waitForPort = 5000
+
+[env]
+CLAUDE_CONFIG_DIR = "/home/runner/workspace/.local/state/claude"

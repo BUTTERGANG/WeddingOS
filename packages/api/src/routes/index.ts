@@ -8,6 +8,7 @@ import { invoicesRouter } from "./invoices.routes.js";
 import { contractsRouter } from "./contracts.routes.js";
 import { calendarRouter } from "./calendar.routes.js";
 import { publicGalleryRouter } from "./gallery-public.routes.js";
+import { publicCalendarRouter } from "./calendar-public.routes.js";
 
 export const routes = Router();
 
@@ -21,3 +22,5 @@ routes.use("/api/contracts", contractsRouter);
 routes.use("/api/calendar", calendarRouter);
 
 routes.use("/api/g/public", publicGalleryRouter);
+
+routes.use("/api/calendar/public", publicCalendarRouter);

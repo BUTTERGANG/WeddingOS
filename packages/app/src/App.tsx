@@ -11,6 +11,8 @@ import GalleryPage from "@/pages/gallery-page";
 import InvoicesPage from "@/pages/invoices-page";
 import ContractsPage from "@/pages/contracts-page";
 import SettingsPage from "@/pages/settings-page";
+import CalendarPage from "@/pages/calendar-page";
+import PublicBookingPage from "@/pages/public-booking-page";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { vendor, isLoading } = useAuth();
@@ -134,6 +136,14 @@ function AppRoutes() {
         <ProtectedRoute>
           <SettingsPage />
         </ProtectedRoute>
+      </Route>
+      <Route path="/calendar">
+        <ProtectedRoute>
+          <CalendarPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/book/:vendorId">
+        <PublicBookingPage />
       </Route>
       <Route>
         <div className="min-h-screen flex items-center justify-center bg-gray-50">

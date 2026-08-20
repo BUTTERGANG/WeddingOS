@@ -86,6 +86,9 @@ export interface Contract {
   status: string;
   signedAt: string | null;
   signatureData: Record<string, unknown> | null;
+  sentAt: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 export interface CalendarSlot {
@@ -96,4 +99,6 @@ export interface CalendarSlot {
   isBooked: boolean;
   clientId: number | null;
   serviceType: string | null;
+  notes: string | null;
+  createdAt: string | null;
 }

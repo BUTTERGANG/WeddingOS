@@ -11,6 +11,33 @@ export const calendarRouter = Router();
 
 calendarRouter.use(requireAuth);
 
+// GET /api/calendar/available — list available slots for this vendor
+calendarRouter.get("/available", async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const vendorId = req.vendor!.id;
+    const { startDate, endDate } = req.query;
+    const start = startDate ? new Date(startDate as string) : new Date();
+    const end = endDate ? new Date(endDate as string) : new Date(Date.now() + 30 * 864e5);
+
+    const slots = await db
+      .select()
+      .from(calendarSlots)
+      .where(
+        and(
+          eq(calendarSlots.vendorId, vendorId),
+          eq(calendarSlots.isBooked, false),
+          gte(calendarSlots.startTime, start),
+          lte(calendarSlots.startTime, end),
+        ),
+      )
+      .orderBy(calendarSlots.startTime);
+
+    res.json({ slots });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // GET /api/calendar — list slots for vendor (query: startDate, endDate)
 calendarRouter.get("/", async (req: AuthenticatedRequest, res, next) => {
   try {

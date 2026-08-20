@@ -169,3 +169,111 @@ export interface SitePage {
   createdAt: string | null;
   updatedAt: string | null;
 }
+
+export interface ExtendedVendor {
+  id: number;
+  name: string;
+  email: string;
+  businessName: string | null;
+  businessWebsite: string | null;
+  phone: string | null;
+  description: string | null;
+  city: string | null;
+  state: string | null;
+  serviceCategories: string[];
+  profileImage: string | null;
+  isVisibleInMarketplace: boolean;
+}
+
+export interface VendorMarketplaceProfile {
+  description: string | null;
+  city: string | null;
+  state: string | null;
+  serviceCategories: string[];
+  profileImage: string | null;
+  isVisibleInMarketplace: boolean;
+}
+
+export interface VendorInquiry {
+  id: number;
+  vendorId: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  weddingDate: string | null;
+  venue: string | null;
+  message: string;
+  serviceInterest: string | null;
+  status: string;
+  readAt: string | null;
+  createdAt: string | null;
+}
+
+export interface VendorInquiryStats {
+  stats: Record<string, number>;
+  total: number;
+}
+
+export interface MarketplaceFilter {
+  city?: string;
+  state?: string;
+  service?: string;
+  q?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface MarketplaceListResponse {
+  vendors: ExtendedVendor[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// ── Multi-Vendor ──────────────────────────────────────────────────────────────
+
+export interface PartnerConnection {
+  id: number;
+  fromVendorId: number;
+  toVendorId: number;
+  status: "pending" | "accepted" | "rejected" | "blocked";
+  message: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  isIncoming: boolean;
+  otherVendor: {
+    id: number;
+    name: string;
+    email: string;
+    businessName: string | null;
+  } | null;
+}
+
+export interface SharedClient {
+  id: number;
+  clientId: number;
+  permission: "read" | "write" | "admin";
+  createdAt: string | null;
+  client: Client | null;
+  ownerVendor?: {
+    id: number;
+    name: string;
+    email: string;
+    businessName: string | null;
+  } | null;
+  partnerVendor?: {
+    id: number;
+    name: string;
+    email: string;
+    businessName: string | null;
+  } | null;
+}
+
+export interface VendorSearchResult {
+  id: number;
+  name: string;
+  email: string;
+  businessName: string | null;
+  businessWebsite: string | null;
+  phone: string | null;
+}

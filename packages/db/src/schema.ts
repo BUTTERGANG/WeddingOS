@@ -25,6 +25,12 @@ export const vendors = pgTable("vendors", {
   businessWebsite: text("business_website"),
   phone: text("phone"),
   stripeAccountId: text("stripe_account_id"),
+  description: text("description"),
+  city: text("city"),
+  state: text("state"),
+  serviceCategories: text("service_categories").array().default(sql`'{}'`),
+  profileImage: text("profile_image"),
+  isVisibleInMarketplace: boolean("is_visible_in_marketplace").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -529,5 +535,100 @@ export const platformSettings = pgTable(
   },
   (table) => ({
     keyIdx: uniqueIndex("platform_settings_key_idx").on(table.key),
+  }),
+);
+
+// ── Vendor Partner Connections ─────────────────────────────────────────────────
+// Partnership / connection between two vendors for multi-vendor collaboration.
+
+export const vendorPartnerConnections = pgTable(
+  "vendor_partner_connections",
+  {
+    id: serial("id").primaryKey(),
+    fromVendorId: integer("from_vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    toVendorId: integer("to_vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    status: text("status").default("pending"),
+    message: text("message"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    fromVendorIdIdx: index("vpc_from_vendor_id_idx").on(table.fromVendorId),
+    toVendorIdIdx: index("vpc_to_vendor_id_idx").on(table.toVendorId),
+    uniquePair: uniqueIndex("vpc_unique_pair_idx").on(
+      table.fromVendorId,
+      table.toVendorId,
+    ),
+    statusCheck: check(
+      "vpc_status_check",
+      sql`${table.status} IN ('pending', 'accepted', 'rejected', 'blocked')`,
+    ),
+  }),
+);
+
+// ── Shared Clients ─────────────────────────────────────────────────────────────
+// Clients shared between partner vendors with permission levels.
+
+export const sharedClients = pgTable(
+  "shared_clients",
+  {
+    id: serial("id").primaryKey(),
+    clientId: integer("client_id")
+      .references(() => clients.id, { onDelete: "cascade" })
+      .notNull(),
+    vendorId: integer("vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    ownerVendorId: integer("owner_vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    permission: text("permission").default("read"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => ({
+    clientIdIdx: index("shared_clients_client_id_idx").on(table.clientId),
+    vendorIdIdx: index("shared_clients_vendor_id_idx").on(table.vendorId),
+    uniqueClientVendor: uniqueIndex("shared_clients_unique_pair_idx").on(
+      table.clientId,
+      table.vendorId,
+    ),
+    permissionCheck: check(
+      "shared_clients_permission_check",
+      sql`${table.permission} IN ('read', 'write', 'admin')`,
+    ),
+  }),
+);
+
+// ── Vendor Inquiries ──────────────────────────────────────────────────────────
+// Inquiries/leads from prospective clients browsing the marketplace.
+
+export const vendorInquiries = pgTable(
+  "vendor_inquiries",
+  {
+    id: serial("id").primaryKey(),
+    vendorId: integer("vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    phone: text("phone"),
+    weddingDate: date("wedding_date"),
+    venue: text("venue"),
+    message: text("message").notNull(),
+    serviceInterest: text("service_interest"),
+    status: text("status").default("new"),
+    readAt: timestamp("read_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => ({
+    vendorIdIdx: index("vendor_inquiries_vendor_id_idx").on(table.vendorId),
+    statusCheck: check(
+      "vendor_inquiries_status_check",
+      sql`${table.status} IN ('new', 'read', 'replied', 'archived')`,
+    ),
   }),
 );

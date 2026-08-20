@@ -15,8 +15,8 @@ import SettingsPage from "@/pages/settings-page";
 import CalendarPage from "@/pages/calendar-page";
 import PublicBookingPage from "@/pages/public-booking-page";
 import BlogListPage from "@/pages/blog-list-page";
-import BlogEditorPage from "@/pages/blog-editor-page";
 import BlogCategoriesPage from "@/pages/blog-categories-page";
+import BlogEditorPage from "@/pages/blog-editor-page";
 import SitePagesPage from "@/pages/site-pages-page";
 import SitePageEditorPage from "@/pages/site-page-editor-page";
 import PublicBlogPage from "@/pages/public-blog-page";
@@ -25,6 +25,12 @@ import AdminLoginPage from "@/pages/admin-login-page";
 import AdminDashboardPage from "@/pages/admin-dashboard-page";
 import AdminVendorsPage from "@/pages/admin-vendors-page";
 import AdminSettingsPage from "@/pages/admin-settings-page";
+import PartnerManagementPage from "@/pages/partner-management-page";
+import SharedClientsPage from "@/pages/shared-clients-page";
+import MarketplaceDirectory from "@/pages/marketplace-directory";
+import MarketplaceVendorProfile from "@/pages/marketplace-vendor-profile";
+import MarketplaceSettings from "@/pages/marketplace-settings";
+import MarketplaceInbox from "@/pages/marketplace-inbox";
 import { AdminLayout } from "@/components/admin-layout";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -217,6 +223,34 @@ function AppRoutes() {
       {/* Public site pages */}
       <Route path="/p/:slug">
         {(params) => <PublicSitePage />}
+      </Route>
+
+      {/* Multi-vendor routes */}
+      <Route path="/settings/partners">
+        <ProtectedRoute>
+          <PartnerManagementPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/clients/shared">
+        <ProtectedRoute>
+          <SharedClientsPage />
+        </ProtectedRoute>
+      </Route>
+
+      {/* Marketplace routes — public (no Layout) */}
+      <Route path="/marketplace" component={MarketplaceDirectory} />
+      <Route path="/marketplace/:id" component={MarketplaceVendorProfile} />
+
+      {/* Marketplace routes — protected (with Layout) */}
+      <Route path="/settings/marketplace">
+        <ProtectedRoute>
+          <MarketplaceSettings />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/inquiries">
+        <ProtectedRoute>
+          <MarketplaceInbox />
+        </ProtectedRoute>
       </Route>
 
       {/* Admin routes — separate auth via admin-session cookie */}

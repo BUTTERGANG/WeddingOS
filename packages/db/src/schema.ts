@@ -363,6 +363,102 @@ export const printOrderItems = pgTable(
   }),
 );
 
+// ── Blog Categories ──────────────────────────────────────────────────────────
+// Categories for blog posts, scoped per vendor.
+
+export const blogCategories = pgTable(
+  "blog_categories",
+  {
+    id: serial("id").primaryKey(),
+    vendorId: integer("vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    sortOrder: integer("sort_order").default(0),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    vendorSlugIdx: uniqueIndex("blog_categories_vendor_slug_idx").on(
+      table.vendorId,
+      table.slug,
+    ),
+    vendorIdIdx: index("blog_categories_vendor_id_idx").on(table.vendorId),
+  }),
+);
+
+// ── Blog Posts ────────────────────────────────────────────────────────────────
+// Blog posts with SEO metadata, scoped per vendor.
+
+export const blogPosts = pgTable(
+  "blog_posts",
+  {
+    id: serial("id").primaryKey(),
+    vendorId: integer("vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    categoryId: integer("category_id").references(() => blogCategories.id, {
+      onDelete: "set null",
+    }),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    content: text("content"),
+    excerpt: text("excerpt"),
+    featuredImage: text("featured_image"),
+    status: text("status").default("draft"),
+    publishedAt: timestamp("published_at"),
+    tags: text("tags").array().default(sql`'{}'::text[]`),
+    seoTitle: text("seo_title"),
+    seoDescription: text("seo_description"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    vendorSlugIdx: uniqueIndex("blog_posts_vendor_slug_idx").on(
+      table.vendorId,
+      table.slug,
+    ),
+    vendorIdIdx: index("blog_posts_vendor_id_idx").on(table.vendorId),
+    categoryIdIdx: index("blog_posts_category_id_idx").on(table.categoryId),
+    statusIdx: index("blog_posts_status_idx").on(table.status),
+    publishedAtIdx: index("blog_posts_published_at_idx").on(table.publishedAt),
+    statusCheck: check(
+      "blog_posts_status_check",
+      sql`${table.status} IN ('draft', 'published', 'scheduled')`,
+    ),
+  }),
+);
+
+// ── Site Pages ────────────────────────────────────────────────────────────────
+// Custom website pages (About, FAQ, etc.), scoped per vendor.
+
+export const sitePages = pgTable(
+  "site_pages",
+  {
+    id: serial("id").primaryKey(),
+    vendorId: integer("vendor_id")
+      .references(() => vendors.id, { onDelete: "cascade" })
+      .notNull(),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    content: text("content"),
+    isHomepage: boolean("is_homepage").default(false),
+    isPublished: boolean("is_published").default(false),
+    seoTitle: text("seo_title"),
+    seoDescription: text("seo_description"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    vendorSlugIdx: uniqueIndex("site_pages_vendor_slug_idx").on(
+      table.vendorId,
+      table.slug,
+    ),
+    vendorIdIdx: index("site_pages_vendor_id_idx").on(table.vendorId),
+  }),
+);
+
 export const sessions = pgTable(
   "sessions",
   {
@@ -375,5 +471,63 @@ export const sessions = pgTable(
   },
   (table) => ({
     vendorIdIdx: index("sessions_vendor_id_idx").on(table.vendorId),
+  }),
+);
+
+// ── Admin Users ───────────────────────────────────────────────────────────────
+// Admin platform users with elevated privileges.
+
+export const adminUsers = pgTable(
+  "admin_users",
+  {
+    id: serial("id").primaryKey(),
+    email: text("email").notNull().unique(),
+    passwordHash: text("password_hash").notNull(),
+    name: text("name").notNull(),
+    role: text("role").default("admin"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    emailIdx: uniqueIndex("admin_users_email_idx").on(table.email),
+    roleCheck: check(
+      "admin_users_role_check",
+      sql`${table.role} IN ('superadmin', 'admin')`,
+    ),
+  }),
+);
+
+// ── Admin Sessions ────────────────────────────────────────────────────────────
+// Cookie-based sessions for admin users.
+
+export const adminSessions = pgTable(
+  "admin_sessions",
+  {
+    id: text("id").primaryKey(),
+    adminUserId: integer("admin_user_id")
+      .references(() => adminUsers.id, { onDelete: "cascade" })
+      .notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => ({
+    adminUserIdIdx: index("admin_sessions_admin_user_id_idx").on(table.adminUserId),
+  }),
+);
+
+// ── Platform Settings ─────────────────────────────────────────────────────────
+// Key-value store for platform-level configuration.
+
+export const platformSettings = pgTable(
+  "platform_settings",
+  {
+    id: serial("id").primaryKey(),
+    key: text("key").notNull().unique(),
+    value: jsonb("value").notNull(),
+    description: text("description"),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    keyIdx: uniqueIndex("platform_settings_key_idx").on(table.key),
   }),
 );

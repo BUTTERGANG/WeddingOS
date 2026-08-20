@@ -12,6 +12,11 @@ import { publicCalendarRouter } from "./calendar-public.routes.js";
 import { printProductsRouter } from "./print-products.routes.js";
 import { printStoreRouter } from "./print-store.routes.js";
 import { pricingRouter } from "./pricing.routes.js";
+import { blogRouter } from "./blog.routes.js";
+import { sitePagesRouter } from "./site-pages.routes.js";
+import { adminAuthRouter } from "./admin-auth.routes.js";
+import { adminRouter } from "./admin.routes.js";
+import { adminSettingsRouter } from "./admin-settings.routes.js";
 
 export const routes = Router();
 
@@ -31,3 +36,11 @@ routes.use("/api/calendar/public", publicCalendarRouter);
 routes.use("/api/print-products", printProductsRouter);
 routes.use("/api/print-store", printStoreRouter);
 routes.use("/api/pricing", pricingRouter);
+
+routes.use("/api/blog", blogRouter);
+routes.use("/api/site-pages", sitePagesRouter);
+
+// Admin routes
+routes.use("/api/admin/auth", adminAuthRouter);
+routes.use("/api/admin", adminRouter);
+routes.use("/api/admin/settings", adminSettingsRouter);

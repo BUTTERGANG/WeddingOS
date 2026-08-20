@@ -14,6 +14,18 @@ import PricingPage from "@/pages/pricing-page";
 import SettingsPage from "@/pages/settings-page";
 import CalendarPage from "@/pages/calendar-page";
 import PublicBookingPage from "@/pages/public-booking-page";
+import BlogListPage from "@/pages/blog-list-page";
+import BlogEditorPage from "@/pages/blog-editor-page";
+import BlogCategoriesPage from "@/pages/blog-categories-page";
+import SitePagesPage from "@/pages/site-pages-page";
+import SitePageEditorPage from "@/pages/site-page-editor-page";
+import PublicBlogPage from "@/pages/public-blog-page";
+import PublicSitePage from "@/pages/public-site-page";
+import AdminLoginPage from "@/pages/admin-login-page";
+import AdminDashboardPage from "@/pages/admin-dashboard-page";
+import AdminVendorsPage from "@/pages/admin-vendors-page";
+import AdminSettingsPage from "@/pages/admin-settings-page";
+import { AdminLayout } from "@/components/admin-layout";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { vendor, isLoading } = useAuth();
@@ -150,9 +162,83 @@ function AppRoutes() {
           <CalendarPage />
         </ProtectedRoute>
       </Route>
+
+      {/* Protected Blog routes */}
+      <Route path="/blog/categories">
+        <ProtectedRoute>
+          <BlogCategoriesPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/blog/new">
+        <ProtectedRoute>
+          <BlogEditorPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/blog/:id/edit">
+        {(params) => (
+          <ProtectedRoute>
+            <BlogEditorPage key={params.id} />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/blog">
+        <ProtectedRoute>
+          <BlogListPage />
+        </ProtectedRoute>
+      </Route>
+
+      {/* Protected Site Pages routes */}
+      <Route path="/site-pages/:id/edit">
+        {(params) => (
+          <ProtectedRoute>
+            <SitePageEditorPage key={params.id} />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/site-pages">
+        <ProtectedRoute>
+          <SitePagesPage />
+        </ProtectedRoute>
+      </Route>
+
+      {/* Public routes (no auth required) */}
       <Route path="/book/:vendorId">
         <PublicBookingPage />
       </Route>
+
+      {/* Public blog — rendered at /public/blog and /public/blog/:slug */}
+      <Route path="/public/blog/:slug">
+        {(params) => <PublicBlogPage />}
+      </Route>
+      <Route path="/public/blog">
+        <PublicBlogPage />
+      </Route>
+
+      {/* Public site pages */}
+      <Route path="/p/:slug">
+        {(params) => <PublicSitePage />}
+      </Route>
+
+      {/* Admin routes — separate auth via admin-session cookie */}
+      <Route path="/admin/login">
+        <AdminLoginPage />
+      </Route>
+      <Route path="/admin/vendors">
+        <AdminLayout>
+          <AdminVendorsPage />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/settings">
+        <AdminLayout>
+          <AdminSettingsPage />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin">
+        <AdminLayout>
+          <AdminDashboardPage />
+        </AdminLayout>
+      </Route>
+
       <Route>
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">

@@ -126,3 +126,46 @@ export interface PrintOrder {
   shippingAddress: Record<string, unknown> | null;
   notes: string | null;
 }
+
+export interface BlogCategory {
+  id: number;
+  vendorId: number;
+  name: string;
+  slug: string;
+  sortOrder: number;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface BlogPost {
+  id: number;
+  vendorId: number;
+  categoryId: number | null;
+  title: string;
+  slug: string;
+  content: string | null;
+  excerpt: string | null;
+  featuredImage: string | null;
+  status: string;
+  publishedAt: string | null;
+  tags: string[];
+  seoTitle: string | null;
+  seoDescription: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  category?: BlogCategory | null;
+}
+
+export interface SitePage {
+  id: number;
+  vendorId: number;
+  title: string;
+  slug: string;
+  content: string | null;
+  isHomepage: boolean;
+  isPublished: boolean;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}

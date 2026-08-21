@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import type { Client, TimelineEvent } from "@/lib/types";
 import { Card, Badge, Skeleton } from "@/components/ui";
+import { Users, Calendar, FileText } from "lucide-react";
 
 interface DashboardStats {
   totalClients: number;
@@ -26,7 +27,8 @@ export default function DashboardPage() {
   const [weekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   useEffect(() => {
-    api<Client[]>("/clients").then((clients) => {
+    api<{ clients: Client[] }>("/clients").then((data) => {
+      const clients = data.clients ?? [];
       setRecentClients(clients.slice(0, 5));
       setStats((prev) => ({
         ...prev,
@@ -38,22 +40,17 @@ export default function DashboardPage() {
       }));
     }).catch(() => {});
 
-    api<TimelineEvent[]>("/timeline/upcoming").then((events) => {
-      setUpcomingEvents(events.slice(0, 7));
-    }).catch(() => {});
-
-    api<any[]>("/invoices/unpaid").then((invoices) => {
-      setStats((prev) => ({ ...prev, unpaidInvoices: invoices.length }));
-    }).catch(() => {});
+    // Upcoming events and unpaid invoices data isn't available via dedicated endpoints yet;
+    // for now these stats remain at their default (0) values
   }, []);
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const statCards = [
-    { label: "Total Clients", value: stats.totalClients, color: "bg-blue-500" },
-    { label: "Active Clients", value: stats.activeClients, color: "bg-green-500" },
-    { label: "Upcoming Weddings", value: stats.upcomingWeddings, color: "bg-purple-500" },
-    { label: "Unpaid Invoices", value: stats.unpaidInvoices, color: "bg-orange-500" },
+    { label: "Total Clients", value: stats.totalClients, icon: Users, color: "bg-blue-500" },
+    { label: "Active Clients", value: stats.activeClients, icon: Users, color: "bg-green-500" },
+    { label: "Upcoming Weddings", value: stats.upcomingWeddings, icon: Calendar, color: "bg-purple-500" },
+    { label: "Unpaid Invoices", value: stats.unpaidInvoices, icon: FileText, color: "bg-orange-500" },
   ];
 
   const statusVariant = (status: string) => {
@@ -65,21 +62,23 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
           Welcome back{vendor ? `, ${vendor.name}` : ""}!
         </h1>
-        <p className="mt-1 text-gray-500">Here's your wedding business at a glance</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Here's your wedding business at a glance</p>
       </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
-          <Card key={card.label}>
+          <Card key={card.label} className="relative overflow-hidden">
             <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${card.color}`} />
-              <span className="text-sm text-gray-500">{card.label}</span>
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <card.icon className={`w-5 h-5 ${card.color.replace("bg-", "text-")}`} />
+              </div>
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.label}</span>
             </div>
-            <p className="mt-2 text-3xl font-bold text-gray-900">{card.value}</p>
+            <p className="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{card.value}</p>
           </Card>
         ))}
       </div>
@@ -88,7 +87,7 @@ export default function DashboardPage() {
         {/* Recent clients */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Clients</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">Recent Clients</h2>
             <Link
               href="/clients"
               className="text-sm text-brand-600 hover:text-brand-700 font-medium"
@@ -125,7 +124,7 @@ export default function DashboardPage() {
 
         {/* Upcoming events / mini calendar */}
         <Card>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100 mb-4">
             This Week
           </h2>
           <div className="grid grid-cols-7 gap-1 mb-4">

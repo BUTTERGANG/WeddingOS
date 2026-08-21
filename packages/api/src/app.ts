@@ -1,9 +1,13 @@
 import express, { type Request, type Response, type NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import compression from "compression";
 import pino from "pino";
 import pinoHttp from "pino-http";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { routes } from "./routes/index.js";
 import { stripeWebhookRouter } from "./routes/stripe-webhook.routes.js";
@@ -22,6 +26,31 @@ export const app = express();
 
 // Trust proxy for correct IP behind reverse proxy
 app.set("trust proxy", 1);
+
+// ── Security headers ───────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false, // disabled for Vite HMR / inline scripts during dev
+  crossOriginEmbedderPolicy: false,
+}));
+
+// ── Response compression ───────────────────────────────────────
+app.use(compression());
+
+// ── Request ID (for log correlation) ───────────────────────────
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("X-Request-Id", crypto.randomUUID());
+  next();
+});
+
+// ── Global rate limit ──────────────────────────────────────────
+// 200 req/min per IP — generous for API, stops connection flood
+app.use(rateLimit({
+  windowMs: 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { name: "TooManyRequests", message: "Too many requests, please try again later" } },
+}));
 
 // Stripe webhook needs raw body before JSON parsing
 app.use("/stripe/webhook", express.raw({ type: "application/json" }), (req: any, _res: any, next: any) => {
@@ -47,40 +76,41 @@ app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 app.use(cookieParser());
 
 // CORS — allow Vite dev server and Replit domains
-if (process.env.NODE_ENV !== "production") {
-  const allowedOrigins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    // Allow Replit preview domains
-    ...(process.env.REPL_ID && process.env.REPL_SLUG && process.env.REPL_OWNER
-      ? [`https://${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`]
-      : []),
-  ];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  // Allow Replit preview domains
+  ...(process.env.REPL_ID && process.env.REPL_SLUG && process.env.REPL_OWNER
+    ? [`https://${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`]
+    : []),
+];
 
-  // Also allow any .replit.dev or .repl.co origin (Replit previews)
-  // endsWith, not includes: prevent CORS bypass via substring match
-  const isReplitDomain = (origin: string) =>
-    origin &&
-    (origin.endsWith(".replit.dev") || origin.endsWith(".repl.co"));
+// Also allow any .replit.dev or .repl.co origin (Replit previews)
+// endsWith, not includes: prevent CORS bypass via substring match
+const isReplitDomain = (origin: string) =>
+  origin &&
+  (origin.endsWith(".replit.dev") || origin.endsWith(".repl.co"));
 
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        // Allow requests with no origin (server-to-server, curl, etc.)
-        if (!origin) return callback(null, true);
-        // Check allowed list
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        // Check Replit domains
-        if (isReplitDomain(origin)) return callback(null, true);
-        // Deny everything else
-        callback(new Error("Not allowed by CORS"));
-      },
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-    }),
-  );
-}
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (server-to-server, curl, etc.)
+      if (!origin) return callback(null, true);
+      // Check allowed list
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Check Replit domains
+      if (isReplitDomain(origin)) return callback(null, true);
+      // In production, allow the canonical SITE_URL
+      const siteUrl = process.env.SITE_URL;
+      if (siteUrl && origin === siteUrl.replace(/\/$/, "")) return callback(null, true);
+      // Deny everything else
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
 // Static file serving — in production, serve the built SPA
 if (process.env.NODE_ENV === "production") {

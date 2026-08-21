@@ -11,7 +11,7 @@ export default function Card({
 }: CardProps) {
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 ${
+      className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm ${
         padding ? "p-5" : ""
       } ${className}`}
     >

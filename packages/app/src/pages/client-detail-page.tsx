@@ -33,9 +33,9 @@ export default function ClientDetailPage({ clientId }: ClientDetailPageProps) {
     }
 
     Promise.all([
-      api<Client>(`/clients/${id}`),
-      api<Invoice[]>(`/clients/${id}/invoices`).catch(() => [] as Invoice[]),
-      api<Contract[]>(`/clients/${id}/contracts`).catch(() => [] as Contract[]),
+      api<{ client: Client }>(`/clients/${id}`).then((d) => d.client),
+      api<{ invoices: Invoice[] }>(`/clients/${id}/invoices`).then((d) => d.invoices).catch(() => [] as Invoice[]),
+      api<{ contracts: Contract[] }>(`/clients/${id}/contracts`).then((d) => d.contracts).catch(() => [] as Contract[]),
     ])
       .then(([clientData, invoiceData, contractData]) => {
         setClient(clientData);

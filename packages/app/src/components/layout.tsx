@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
-import { Menu, LogOut, Gem, Sun, Moon } from "lucide-react";
+import {
+  Menu, LogOut, Gem, Sun, Moon, LayoutDashboard, Calendar,
+  Users, Share2, FileText, Newspaper, Globe, Inbox,
+  Store, Handshake, Settings,
+} from "lucide-react";
 import { useTheme } from "@/lib/theme";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/calendar", label: "Calendar" },
-  { href: "/clients", label: "Clients" },
-  { href: "/clients/shared", label: "Shared Clients" },
-  { href: "/blog", label: "Blog" },
-  { href: "/site-pages", label: "Site Pages" },
-  { href: "/inquiries", label: "Inquiries" },
-  { href: "/settings/marketplace", label: "Marketplace" },
-  { href: "/settings/partners", label: "Partners" },
-  { href: "/settings", label: "Settings" },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/calendar", label: "Calendar", icon: Calendar },
+  { href: "/clients", label: "Clients", icon: Users },
+  { href: "/clients/shared", label: "Shared Clients", icon: Share2 },
+  { href: "/blog", label: "Blog", icon: FileText },
+  { href: "/site-pages", label: "Site Pages", icon: Globe },
+  { href: "/inquiries", label: "Inquiries", icon: Inbox },
+  { href: "/settings/marketplace", label: "Marketplace", icon: Store },
+  { href: "/settings/partners", label: "Partners", icon: Handshake },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -71,6 +75,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
               }`}
             >
+              <item.icon className="w-4 h-4 mr-3 flex-shrink-0" />
               {item.label}
             </Link>
           ))}

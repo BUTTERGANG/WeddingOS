@@ -1,18 +1,18 @@
 ---
 name: Existing database schema sync
-description: Safe schema-change handling for the imported WeddingOS PostgreSQL database.
+description: Safe schema-change handling for the WeddingOS database — the Neon DB needs migration to match the current schema.
 ---
 
-The current Drizzle Kit schema push is incompatible with PostgreSQL databases
-that expose named `NOT NULL` constraints, including constraints on primary-key
-columns. It incorrectly proposes dropping them and PostgreSQL rejects the
-operation for primary-key IDs.
+The WeddingOS Neon database was seeded from Phase 1 (11 tables at commit c408095) and is missing 13 tables and 6 vendor columns added in Phases 2 and 3. Running `pnpm db:push` via Drizzle Kit fails because the Neon pooler's named NOT NULL constraints conflict with Drizzle's schema diffing.
 
-**Why:** The configured WeddingOS database already has the complete expected
-table set. Forcing the generated change would risk changing a populated
-database without a reliable migration path.
+**What's missing (vs current schema at HEAD):**
+- 6 vendor columns: description, city, state, service_categories, profile_image, is_visible_in_marketplace
+- 13 tables: print_products, print_orders, print_order_items, blog_categories, blog_posts, site_pages, admin_users, admin_sessions, platform_settings, vendor_partner_connections, shared_clients, vendor_inquiries
 
-**How to apply:** Treat a failed push containing `DROP CONSTRAINT
-..._id_not_null` as a tooling-compatibility issue, not an empty-schema setup
-step. Verify the existing schema first and create or test a safe migration
-strategy before applying changes.
+**How to apply:** Run the SQL migration script at `packages/db/migrations/001-schema-migration.sql` directly against the Neon database:
+
+```
+psql "$APP_DATABASE_URL" -f packages/db/migrations/001-schema-migration.sql
+```
+
+Or run it from a tsx script that uses the postgres client. The script uses `IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS` so it's safe to re-run.

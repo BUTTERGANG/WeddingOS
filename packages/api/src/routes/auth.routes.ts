@@ -1,4 +1,5 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { db } from "../db.js";
 import { vendors, sessions } from "@weddingos/db";
 import { eq, and, lt } from "drizzle-orm";
@@ -9,22 +10,38 @@ import {
   sessionExpiry,
 } from "../auth.js";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.js";
+import { asyncHandler } from "../middleware/async-handler.js";
+import { validate } from "../middleware/validate.js";
+import { z } from "zod";
 
 export const authRouter = Router();
 
-// POST /api/auth/register — create vendor account + start session
-authRouter.post("/register", async (req, res, next) => {
-  try {
-    const { name, email, password } = req.body;
+// ── Auth-specific rate limits ──────────────────────────────────
+// Stricter: 10 attempts per 15 min per IP on login/register
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { name: "TooManyRequests", message: "Too many login attempts. Please try again later." } },
+});
 
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        error: {
-          name: "ValidationError",
-          message: "name, email, and password are required",
-        },
-      });
-    }
+authRouter.use(authLimiter);
+
+const registerSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Valid email required"),
+  password: z.string().min(6, "Password must be at least 6 characters").max(128),
+});
+
+const loginSchema = z.object({
+  email: z.string().email("Valid email required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+// POST /api/auth/register — create vendor account + start session
+authRouter.post("/register", validate({ body: registerSchema }), asyncHandler(async (req, res) => {
+    const { name, email, password } = req.body;
 
     // Check for existing vendor by email
     const [existing] = await db
@@ -34,12 +51,13 @@ authRouter.post("/register", async (req, res, next) => {
       .limit(1);
 
     if (existing) {
-      return res.status(409).json({
+      res.status(409).json({
         error: {
           name: "Conflict",
           message: "An account with that email already exists",
         },
       });
+      return;
     }
 
     const passwordHash = await hashPassword(password);
@@ -73,24 +91,11 @@ authRouter.post("/register", async (req, res, next) => {
       },
       message: "Registration successful",
     });
-  } catch (error) {
-    next(error);
-  }
-});
+  }));
 
 // POST /api/auth/login — authenticate vendor + create session
-authRouter.post("/login", async (req, res, next) => {
-  try {
+authRouter.post("/login", validate({ body: loginSchema }), asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        error: {
-          name: "ValidationError",
-          message: "email and password are required",
-        },
-      });
-    }
 
     const [vendor] = await db
       .select()
@@ -99,22 +104,24 @@ authRouter.post("/login", async (req, res, next) => {
       .limit(1);
 
     if (!vendor) {
-      return res.status(401).json({
+      res.status(401).json({
         error: {
           name: "Unauthorized",
           message: "Invalid email or password",
         },
       });
+      return;
     }
 
     const valid = await comparePassword(password, vendor.passwordHash);
     if (!valid) {
-      return res.status(401).json({
+      res.status(401).json({
         error: {
           name: "Unauthorized",
           message: "Invalid email or password",
         },
       });
+      return;
     }
 
     // Create session
@@ -141,18 +148,17 @@ authRouter.post("/login", async (req, res, next) => {
       },
       message: "Login successful",
     });
-  } catch (error) {
-    next(error);
-  }
-});
+  }));
 
-// POST /api/auth/logout — destroy session
-authRouter.post("/logout", async (req, res, next) => {
-  try {
+// POST /api/auth/logout — destroy session + clean expired sessions
+authRouter.post("/logout", asyncHandler(async (req, res) => {
     const token = req.cookies?.session_token;
     if (token) {
       await db.delete(sessions).where(eq(sessions.id, token));
     }
+
+    // Best-effort cleanup of expired sessions
+    await db.delete(sessions).where(lt(sessions.expiresAt, new Date())).catch(() => {});
 
     res.clearCookie("session_token", {
       httpOnly: true,
@@ -162,12 +168,15 @@ authRouter.post("/logout", async (req, res, next) => {
     });
 
     res.json({ message: "Logout successful" });
-  } catch (error) {
-    next(error);
-  }
-});
+  }));
 
 // GET /api/auth/me — return current vendor info from session
 authRouter.get("/me", requireAuth, (req: AuthenticatedRequest, res) => {
   res.json({ vendor: req.vendor ?? null });
 });
+
+// POST /api/auth/cleanup — admin-triggered expired session purge
+authRouter.post("/cleanup", asyncHandler(async (_req, res) => {
+    const deleted = await db.delete(sessions).where(lt(sessions.expiresAt, new Date())).returning({ id: sessions.id });
+    res.json({ message: "Expired sessions cleaned up", count: deleted.length });
+  }));
